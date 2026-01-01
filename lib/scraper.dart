@@ -88,14 +88,8 @@ class TimetableScraper {
     final document = parser.parse(response.body);
 
     final lectures = document.querySelectorAll('.grid-entry').map((e) {
-      final startTimeParts = e.attributes['data-start']!.split(':');
-      final startTime = TimeOfDay(
-        hour: int.parse(startTimeParts[0]),
-        minute: int.parse(startTimeParts[1]),
-      );
-      final endTime = startTime.replacing(
-        hour: startTime.hour + int.parse(e.attributes['data-duration']!),
-      );
+      final startTime = int.parse(e.attributes['data-start']!.split(':')[0]);
+      final endTime = startTime + int.parse(e.attributes['data-duration']!);
 
       final teachers = e
           .querySelectorAll('.link-teacher')
@@ -124,7 +118,7 @@ class TimetableScraper {
       return Lecture(
         id: e.attributes['data-allocation-id']!,
         day: DayOfWeek.parse(e.attributes['data-day']!),
-        time: TimeOfDayRange(start: startTime, end: endTime),
+        time: HourRange(start: startTime, end: endTime),
         teachers: teachers,
         classroom: classroom,
         subject: subject,
