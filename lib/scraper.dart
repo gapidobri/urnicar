@@ -213,6 +213,19 @@ enum DayOfWeek {
   }
 }
 
+class HourRange {
+  final int start;
+  final int end;
+
+  const HourRange({required this.start, required this.end});
+
+  int get duration => end - start;
+
+  @override
+  String toString() =>
+      '${start.toString().padLeft(2, '0')} - ${end.toString().padLeft(2, '0')}';
+}
+
 enum FilterType {
   teacher('teacher'),
   student('student'),
@@ -258,7 +271,7 @@ enum LectureType {
 class Lecture {
   final String id;
   final DayOfWeek day;
-  final TimeOfDayRange time;
+  final HourRange time;
   final List<Teacher> teachers;
   final Classroom classroom;
   final Subject subject;
