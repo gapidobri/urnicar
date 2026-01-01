@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:kalender/kalender.dart';
 
 class Event {
   final String title;
+
   const Event(this.title);
 }
 
@@ -34,9 +34,14 @@ class _CalendarScreenState extends State<CalendarScreen> {
 
     // mozni prikazi urnika
     viewConfigurations = [
-      MultiDayViewConfiguration.singleDay(displayRange: displayRange,
-      initialTimeOfDay: const TimeOfDay(hour: 6, minute: 0)),
-      MultiDayViewConfiguration.workWeek(displayRange: displayRange, initialTimeOfDay: const TimeOfDay(hour: 6, minute: 0)),
+      MultiDayViewConfiguration.singleDay(
+        displayRange: displayRange,
+        initialTimeOfDay: const TimeOfDay(hour: 6, minute: 0),
+      ),
+      MultiDayViewConfiguration.workWeek(
+        displayRange: displayRange,
+        initialTimeOfDay: const TimeOfDay(hour: 6, minute: 0),
+      ),
     ];
 
     // default je prikaz tedenskega urnika
