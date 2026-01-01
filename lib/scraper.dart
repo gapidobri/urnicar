@@ -1,7 +1,5 @@
-import 'package:flutter/material.dart';
 import 'package:html/parser.dart' as parser;
 import 'package:http/http.dart' as http;
-import 'package:kalender/kalender.dart';
 
 class TimetableScraper {
   static const _baseUrl = 'https://urnik.fri.uni-lj.si/timetable';

@@ -1,23 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:hive_ce_flutter/adapters.dart';
 import 'package:urnicar/calendar/calendar_screen.dart';
+import 'package:urnicar/hive/hive_registrar.g.dart';
+import 'package:urnicar/timetable/timetable_repository.dart';
 
 void main() async {
-  // final res = await TimetableScraper.getTimetables();
-  // print(res);
+  await Hive.initFlutter();
+  Hive.registerAdapters();
 
-  // final res2 = await TimetableScraper.getTimetableData('fri-2025_2026-zimski');
-  // print(res2.teachers);
-
-  // final res3 = await TimetableScraper.getLectures(
-  //   timetableId: 'fri-2025_2026-zimski',
-  //   filterType: FilterType.student,
-  //   id: '63230048',
-  // );
-  // for (final lecture in res3) {
-  //   print(lecture);
-  // }
+  await TimetableRepository.openBox();
 
   runApp(const ProviderScope(child: App()));
 }
