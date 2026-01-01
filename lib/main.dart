@@ -3,7 +3,22 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:urnicar/calendar/calendar_screen.dart';
 
-void main() {
+void main() async {
+  // final res = await TimetableScraper.getTimetables();
+  // print(res);
+
+  // final res2 = await TimetableScraper.getTimetableData('fri-2025_2026-zimski');
+  // print(res2.teachers);
+
+  // final res3 = await TimetableScraper.getLectures(
+  //   timetableId: 'fri-2025_2026-zimski',
+  //   filterType: FilterType.student,
+  //   id: '63230048',
+  // );
+  // for (final lecture in res3) {
+  //   print(lecture);
+  // }
+
   runApp(const ProviderScope(child: App()));
 }
 
@@ -13,8 +28,8 @@ class App extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp.router(
-        theme: ThemeData(useMaterial3: true),
-        routerConfig: _router
+      theme: ThemeData(useMaterial3: true),
+      routerConfig: _router,
     );
   }
 }
