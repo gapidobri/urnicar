@@ -1,5 +1,5 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:urnicar/data/timetable/timetable_scraper.dart';
+import 'package:urnicar/data/remote_timetable/timetable_scraper.dart';
 
 part 'remote_timetable_data_provider.g.dart';
 

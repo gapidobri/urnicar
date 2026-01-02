@@ -46,4 +46,4 @@ final class RemoteTimetablesProvider
   }
 }
 
-String _$remoteTimetablesHash() => r'61e5f93e8aeb09b2838413408aa4b0e45ec184be';
+String _$remoteTimetablesHash() => r'84dee8571434a3ca15aa7f8ca9e5d70ddc4b2452';

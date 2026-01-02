@@ -183,6 +183,15 @@ class Subject {
 
   const Subject({required this.id, required this.name});
 
+  String get acronym {
+    final excludedWords = ['in'];
+    return name
+        .split(' ')
+        .where((p) => !excludedWords.contains(p) && !p.startsWith('('))
+        .map((p) => p.substring(0, 1).toUpperCase())
+        .join();
+  }
+
   Subject copyWith({String? id, String? name}) =>
       Subject(id: id ?? this.id, name: name ?? this.name);
 

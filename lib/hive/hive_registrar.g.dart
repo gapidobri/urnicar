@@ -7,14 +7,30 @@ import 'package:urnicar/hive/hive_adapters.dart';
 
 extension HiveRegistrar on HiveInterface {
   void registerAdapters() {
+    registerAdapter(ClassroomAdapter());
+    registerAdapter(DayOfWeekAdapter());
+    registerAdapter(FilterTypeAdapter());
+    registerAdapter(GroupAdapter());
+    registerAdapter(HourRangeAdapter());
     registerAdapter(LectureAdapter());
+    registerAdapter(LectureTypeAdapter());
+    registerAdapter(SubjectAdapter());
+    registerAdapter(TeacherAdapter());
     registerAdapter(TimetableRecordAdapter());
   }
 }
 
 extension IsolatedHiveRegistrar on IsolatedHiveInterface {
   void registerAdapters() {
+    registerAdapter(ClassroomAdapter());
+    registerAdapter(DayOfWeekAdapter());
+    registerAdapter(FilterTypeAdapter());
+    registerAdapter(GroupAdapter());
+    registerAdapter(HourRangeAdapter());
     registerAdapter(LectureAdapter());
+    registerAdapter(LectureTypeAdapter());
+    registerAdapter(SubjectAdapter());
+    registerAdapter(TeacherAdapter());
     registerAdapter(TimetableRecordAdapter());
   }
 }

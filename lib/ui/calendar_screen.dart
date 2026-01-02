@@ -1,14 +1,10 @@
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:kalender/kalender.dart';
+import 'package:urnicar/data/remote_timetable/timetable_scraper.dart';
 import 'package:urnicar/data/timetable/timetables_provider.dart';
-
-class Event {
-  final String title;
-
-  const Event(this.title);
-}
 
 class CalendarScreen extends ConsumerStatefulWidget {
   const CalendarScreen({super.key});
@@ -18,42 +14,26 @@ class CalendarScreen extends ConsumerStatefulWidget {
 }
 
 class _CalendarScreenState extends ConsumerState<CalendarScreen> {
-  final eventsController = DefaultEventsController<Event>();
-  final calendarController = CalendarController<Event>();
+  final eventsController = DefaultEventsController<Lecture>();
+  final calendarController = CalendarController<Lecture>();
 
   bool editMode = false;
 
-  final now = DateTime.now();
-  late final displayRange = DateTimeRange(
-    start: now.subtract(const Duration(days: 363)),
-    end: now.add(const Duration(days: 365)),
-  );
-
   late ViewConfiguration viewConfiguration;
   late final List<ViewConfiguration> viewConfigurations;
-  String? selectedOption;
+
+  String? selectedTimetableId;
 
   @override
   void initState() {
     super.initState();
 
-    // mozni prikazi urnika
+    final displayRange = DateTime.now().weekRange();
     viewConfigurations = [
-      MultiDayViewConfiguration.singleDay(
-        displayRange: displayRange,
-        initialTimeOfDay: const TimeOfDay(hour: 6, minute: 0),
-      ),
-      MultiDayViewConfiguration.workWeek(
-        displayRange: displayRange,
-        initialTimeOfDay: const TimeOfDay(hour: 6, minute: 0),
-      ),
+      MultiDayViewConfiguration.singleDay(displayRange: displayRange),
+      MultiDayViewConfiguration.workWeek(displayRange: displayRange),
     ];
-
-    // default je prikaz tedenskega urnika
     viewConfiguration = viewConfigurations[1];
-
-    // za dodajanje eventov debugging purposes
-    // eventsController.addEvents([]);
   }
 
   void handleTimetableChange(String? value) {
@@ -62,7 +42,28 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
       context.push('/import');
       return;
     }
-    setState(() => selectedOption = value);
+    setState(() => selectedTimetableId = value);
+
+    eventsController.clearEvents();
+
+    final timetable = ref
+        .read(timetablesProvider)
+        .firstWhereOrNull((t) => t.id == selectedTimetableId);
+    if (timetable == null) return;
+
+    final startOfWeek = DateTime.now().startOfWeek();
+    final events = timetable.lectures.map((lecture) {
+      final day = startOfWeek.addDays(lecture.day.value);
+      return CalendarEvent<Lecture>(
+        dateTimeRange: DateTimeRange(
+          start: day.add(Duration(hours: lecture.time.start)),
+          end: day.add(Duration(hours: lecture.time.end)),
+        ),
+        data: lecture,
+      );
+    }).toList();
+
+    eventsController.addEvents(events);
   }
 
   @override
@@ -70,50 +71,45 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
     return Scaffold(
       floatingActionButton: editMode
           ? FloatingActionButton(
-        onPressed: () {
-          setState(() {
-            editMode = false;
-          });
-        },
-        child: const Icon(Icons.check),
-      )
+              onPressed: () => setState(() => editMode = false),
+              child: const Icon(Icons.check),
+            )
           : null,
-      // glavni calendar widget
-      body: CalendarView<Event>(
+
+      body: CalendarView<Lecture>(
         eventsController: eventsController,
         calendarController: calendarController,
         viewConfiguration: viewConfiguration,
-        callbacks: CalendarCallbacks<Event>(
-          onEventTapped: (event, _) =>
-              calendarController.selectEvent(event),
+        callbacks: CalendarCallbacks(
+          onEventTapped: (event, _) => calendarController.selectEvent(event),
           onEventCreate: editMode ? (event) => event : null,
           onEventCreated: editMode
               ? (event) => eventsController.addEvent(event)
               : null,
         ),
-        header: Material(
-          child: Column(
-            children: [
-              topToolbar(),
-              _calendarToolbar(),
-              if (editMode)
-                const Padding(
-                  padding: EdgeInsets.all(4),
-                  child: Text(
-                    "Urejanje urnika",
-                    style: TextStyle(
-                      color: Colors.redAccent,
-                    ),
-                  ),
+        header: Column(
+          children: [
+            topToolbar(),
+            calendarToolbar(),
+            if (editMode)
+              const Padding(
+                padding: EdgeInsets.all(4),
+                child: Text(
+                  'Urejanje urnika',
+                  style: TextStyle(color: Colors.redAccent),
                 ),
-              const CalendarHeader<Event>(),
-            ],
-          ),
+              ),
+            const CalendarHeader<Lecture>(
+              multiDayHeaderConfiguration: MultiDayHeaderConfiguration(
+                showTiles: false,
+              ),
+            ),
+          ],
         ),
-        body: CalendarBody<Event>(
+        body: CalendarBody<Lecture>(
           calendarController: calendarController,
           eventsController: eventsController,
-          multiDayTileComponents: TileComponents<Event>(
+          multiDayTileComponents: TileComponents(
             tileBuilder: (event, tileRange) {
               return Container(
                 margin: const EdgeInsets.all(2),
@@ -123,7 +119,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                   borderRadius: BorderRadius.circular(6),
                 ),
                 child: Text(
-                  event.data!.title,
+                  event.data?.subject.acronym ?? 'Other',
                   style: const TextStyle(color: Colors.white),
                 ),
               );
@@ -134,8 +130,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
     );
   }
 
-  // dropdown za menjavo pogleda + ikonca za vračanje na trenuten dan
-  Widget _calendarToolbar() {
+  Widget calendarToolbar() {
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Row(
@@ -151,17 +146,11 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
               },
             ),
           ),
-          // klik na ikono skoci na danasnji datum
-          IconButton(
-            onPressed: () => calendarController.animateToDate(DateTime.now()),
-            icon: const Icon(Icons.today),
-          ),
         ],
       ),
     );
   }
 
-  // zgornji toolbar za izbiro urnika + menu
   Widget topToolbar() {
     return SafeArea(
       bottom: false,
@@ -170,31 +159,29 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
         child: Row(
           children: [
             PopupMenuButton<String>(
-              icon: const CircleAvatar(
-                child: Icon(Icons.person, size: 18),
-              ),
+              icon: const CircleAvatar(child: Icon(Icons.person, size: 18)),
               onSelected: (value) {
                 if (value == "login") {
                   context.push('/login');
                 }
               },
               itemBuilder: (context) => const [
-                PopupMenuItem(
-                  value: "login",
-                  child: Text("Vpis"),
-                ),
+                PopupMenuItem(value: "login", child: Text("Vpis")),
               ],
             ),
             Expanded(
               flex: 8,
               child: DropdownButton<String>(
-                value: selectedOption,
+                value: selectedTimetableId,
                 hint: const Text("Izberi urnik"),
                 items: [
                   for (final timetable in ref.watch(timetablesProvider))
                     DropdownMenuItem(
                       value: timetable.id,
-                      child: Text(timetable.name),
+                      child: Text(
+                        timetable.name,
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     ),
                   DropdownMenuItem(
                     value: 'import',
@@ -209,6 +196,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                 ],
                 onChanged: handleTimetableChange,
                 isExpanded: true,
+                // isExpanded: true,
               ),
             ),
             const SizedBox(width: 8),
@@ -224,10 +212,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                   }
                 },
                 itemBuilder: (context) => const [
-                  PopupMenuItem(
-                    value: "edit",
-                    child: Text("Uredi"),
-                  ),
+                  PopupMenuItem(value: "edit", child: Text("Uredi")),
                 ],
               ),
             ),

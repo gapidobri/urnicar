@@ -11,7 +11,7 @@ class Timetables extends _$Timetables {
     return timetablesBox.values.toList();
   }
 
-  void createTimetable(TimetableRecord timetable) async {
+  Future<void> createTimetable(TimetableRecord timetable) async {
     await timetablesBox.put(timetable.id, timetable);
     state = timetablesBox.values.toList();
   }
