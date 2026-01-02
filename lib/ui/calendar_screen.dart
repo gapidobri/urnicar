@@ -175,7 +175,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
               ),
               onSelected: (value) {
                 if (value == "login") {
-                  // context.push('/login');
+                  context.push('/login');
                 }
               },
               itemBuilder: (context) => const [

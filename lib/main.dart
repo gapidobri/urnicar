@@ -7,6 +7,8 @@ import 'package:urnicar/hive/boxes.dart';
 import 'package:urnicar/hive/hive_registrar.g.dart';
 import 'package:urnicar/ui/calendar_screen.dart';
 import 'package:urnicar/ui/import_screen.dart';
+import 'package:urnicar/ui/login_screen.dart';
+import 'package:urnicar/ui/register_screen.dart';
 
 void main() async {
   await Hive.initFlutter();
@@ -33,5 +35,7 @@ final _router = GoRouter(
   routes: [
     GoRoute(path: '/', builder: (context, state) => CalendarScreen()),
     GoRoute(path: '/import', builder: (context, state) => ImportScreen()),
+    GoRoute(path: '/login', builder: (context, state) => LoginScreen()),
+    GoRoute(path: '/register', builder: (context, state) => RegisterScreen())
   ],
 );
