@@ -144,6 +144,9 @@ class Teacher {
 
   const Teacher({required this.id, required this.name});
 
+  Teacher copyWith({String? id, String? name}) =>
+      Teacher(id: id ?? this.id, name: name ?? this.name);
+
   @override
   String toString() => 'Teacher(id: $id, name: $name)';
 }
@@ -153,6 +156,9 @@ class Classroom {
   final String name;
 
   const Classroom({required this.id, required this.name});
+
+  Classroom copyWith({String? id, String? name}) =>
+      Classroom(id: id ?? this.id, name: name ?? this.name);
 
   @override
   String toString() => 'Classroom(id: $id, name: $name)';
@@ -164,6 +170,9 @@ class Group {
 
   const Group({required this.id, required this.name});
 
+  Group copyWith({String? id, String? name}) =>
+      Group(id: id ?? this.id, name: name ?? this.name);
+
   @override
   String toString() => 'Group(id: $id, name: $name)';
 }
@@ -173,6 +182,9 @@ class Subject {
   final String name;
 
   const Subject({required this.id, required this.name});
+
+  Subject copyWith({String? id, String? name}) =>
+      Subject(id: id ?? this.id, name: name ?? this.name);
 
   @override
   String toString() => 'Subject(id: $id, name: $name)';
@@ -278,6 +290,24 @@ class Lecture {
     required this.subject,
     required this.type,
   });
+
+  Lecture copyWith({
+    String? id,
+    DayOfWeek? day,
+    HourRange? time,
+    List<Teacher>? teachers,
+    Classroom? classroom,
+    Subject? subject,
+    LectureType? type,
+  }) => Lecture(
+    id: id ?? this.id,
+    day: day ?? this.day,
+    time: time ?? this.time,
+    teachers: teachers ?? this.teachers,
+    classroom: classroom ?? this.classroom,
+    subject: subject ?? this.subject,
+    type: type ?? this.type,
+  );
 
   @override
   String toString() =>

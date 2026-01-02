@@ -2,15 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hive_ce_flutter/adapters.dart';
-import 'package:urnicar/calendar/calendar_screen.dart';
+import 'package:urnicar/data/timetable/timetable_record.dart';
+import 'package:urnicar/hive/boxes.dart';
 import 'package:urnicar/hive/hive_registrar.g.dart';
-import 'package:urnicar/timetable/timetable_repository.dart';
+import 'package:urnicar/ui/calendar_screen.dart';
+import 'package:urnicar/ui/import_screen.dart';
 
 void main() async {
   await Hive.initFlutter();
   Hive.registerAdapters();
 
-  await TimetableRepository.openBox();
+  timetablesBox = await Hive.openBox<TimetableRecord>('timetables');
 
   runApp(const ProviderScope(child: App()));
 }
@@ -28,5 +30,8 @@ class App extends StatelessWidget {
 }
 
 final _router = GoRouter(
-  routes: [GoRoute(path: '/', builder: (context, state) => CalendarScreen())],
+  routes: [
+    GoRoute(path: '/', builder: (context, state) => CalendarScreen()),
+    GoRoute(path: '/import', builder: (context, state) => ImportScreen()),
+  ],
 );

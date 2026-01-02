@@ -6,55 +6,6 @@ part of 'hive_adapters.dart';
 // AdaptersGenerator
 // **************************************************************************
 
-class TimetableAdapter extends TypeAdapter<Timetable> {
-  @override
-  final typeId = 0;
-
-  @override
-  Timetable read(BinaryReader reader) {
-    final numOfFields = reader.readByte();
-    final fields = <int, dynamic>{
-      for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
-    };
-    return Timetable(
-      sourceTimetableId: fields[3] as String,
-      sourceFilterType: fields[4] as FilterType,
-      sourceId: fields[0] as String,
-      id: fields[5] as String,
-      name: fields[1] as String,
-      lectures: (fields[2] as List).cast<Lecture>(),
-    );
-  }
-
-  @override
-  void write(BinaryWriter writer, Timetable obj) {
-    writer
-      ..writeByte(6)
-      ..writeByte(0)
-      ..write(obj.sourceId)
-      ..writeByte(1)
-      ..write(obj.name)
-      ..writeByte(2)
-      ..write(obj.lectures)
-      ..writeByte(3)
-      ..write(obj.sourceTimetableId)
-      ..writeByte(4)
-      ..write(obj.sourceFilterType)
-      ..writeByte(5)
-      ..write(obj.id);
-  }
-
-  @override
-  int get hashCode => typeId.hashCode;
-
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is TimetableAdapter &&
-          runtimeType == other.runtimeType &&
-          typeId == other.typeId;
-}
-
 class LectureAdapter extends TypeAdapter<Lecture> {
   @override
   final typeId = 1;
@@ -103,6 +54,55 @@ class LectureAdapter extends TypeAdapter<Lecture> {
   bool operator ==(Object other) =>
       identical(this, other) ||
       other is LectureAdapter &&
+          runtimeType == other.runtimeType &&
+          typeId == other.typeId;
+}
+
+class TimetableRecordAdapter extends TypeAdapter<TimetableRecord> {
+  @override
+  final typeId = 2;
+
+  @override
+  TimetableRecord read(BinaryReader reader) {
+    final numOfFields = reader.readByte();
+    final fields = <int, dynamic>{
+      for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
+    };
+    return TimetableRecord(
+      sourceTimetableId: fields[0] as String,
+      sourceFilterType: fields[1] as FilterType,
+      sourceId: fields[2] as String,
+      id: fields[3] as String,
+      name: fields[4] as String,
+      lectures: (fields[5] as List).cast<Lecture>(),
+    );
+  }
+
+  @override
+  void write(BinaryWriter writer, TimetableRecord obj) {
+    writer
+      ..writeByte(6)
+      ..writeByte(0)
+      ..write(obj.sourceTimetableId)
+      ..writeByte(1)
+      ..write(obj.sourceFilterType)
+      ..writeByte(2)
+      ..write(obj.sourceId)
+      ..writeByte(3)
+      ..write(obj.id)
+      ..writeByte(4)
+      ..write(obj.name)
+      ..writeByte(5)
+      ..write(obj.lectures);
+  }
+
+  @override
+  int get hashCode => typeId.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is TimetableRecordAdapter &&
           runtimeType == other.runtimeType &&
           typeId == other.typeId;
 }

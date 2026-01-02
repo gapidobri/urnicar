@@ -8,13 +8,13 @@ import 'package:urnicar/hive/hive_adapters.dart';
 extension HiveRegistrar on HiveInterface {
   void registerAdapters() {
     registerAdapter(LectureAdapter());
-    registerAdapter(TimetableAdapter());
+    registerAdapter(TimetableRecordAdapter());
   }
 }
 
 extension IsolatedHiveRegistrar on IsolatedHiveInterface {
   void registerAdapters() {
     registerAdapter(LectureAdapter());
-    registerAdapter(TimetableAdapter());
+    registerAdapter(TimetableRecordAdapter());
   }
 }

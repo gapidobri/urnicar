@@ -1,6 +1,6 @@
-import 'package:urnicar/scraper.dart';
+import 'package:urnicar/data/timetable/timetable_scraper.dart';
 
-class Timetable {
+class TimetableRecord {
   final String sourceTimetableId;
   final FilterType sourceFilterType;
   final String sourceId;
@@ -8,7 +8,7 @@ class Timetable {
   final String name;
   final List<Lecture> lectures;
 
-  const Timetable({
+  const TimetableRecord({
     required this.sourceTimetableId,
     required this.sourceFilterType,
     required this.sourceId,

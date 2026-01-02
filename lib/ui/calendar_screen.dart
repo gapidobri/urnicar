@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:kalender/kalender.dart';
+import 'package:urnicar/data/timetable/timetables_provider.dart';
 
 class Event {
   final String title;
@@ -7,14 +10,14 @@ class Event {
   const Event(this.title);
 }
 
-class CalendarScreen extends StatefulWidget {
+class CalendarScreen extends ConsumerStatefulWidget {
   const CalendarScreen({super.key});
 
   @override
-  State<CalendarScreen> createState() => _CalendarScreenState();
+  ConsumerState<CalendarScreen> createState() => _CalendarScreenState();
 }
 
-class _CalendarScreenState extends State<CalendarScreen> {
+class _CalendarScreenState extends ConsumerState<CalendarScreen> {
   final eventsController = DefaultEventsController<Event>();
   final calendarController = CalendarController<Event>();
 
@@ -49,6 +52,15 @@ class _CalendarScreenState extends State<CalendarScreen> {
 
     // za dodajanje eventov debugging purposes
     // eventsController.addEvents([]);
+  }
+
+  void handleTimetableChange(String? value) {
+    if (value == null) return;
+    if (value == 'import') {
+      context.push('/import');
+      return;
+    }
+    setState(() => selectedOption = value);
   }
 
   @override
@@ -118,21 +130,24 @@ class _CalendarScreenState extends State<CalendarScreen> {
               child: DropdownButton<String>(
                 value: selectedOption,
                 hint: const Text("Izberi urnik"),
-                items: const [
+                items: [
+                  for (final timetable in ref.watch(timetablesProvider))
+                    DropdownMenuItem(
+                      value: timetable.id,
+                      child: Text(timetable.name),
+                    ),
                   DropdownMenuItem(
-                    value: "FRI VSŠ 2025/26",
-                    child: Text("FRI VSŠ 2025/26"),
-                  ),
-                  DropdownMenuItem(
-                    value: "FRI UNI 2025/26",
-                    child: Text("FRI UNI 2025/26"),
+                    value: 'import',
+                    child: Row(
+                      spacing: 8.0,
+                      children: [
+                        Icon(Icons.add, size: 24.0),
+                        Text('Uvozi urnik'),
+                      ],
+                    ),
                   ),
                 ],
-                onChanged: (value) {
-                  setState(() {
-                    selectedOption = value;
-                  });
-                },
+                onChanged: handleTimetableChange,
                 isExpanded: true,
               ),
             ),
