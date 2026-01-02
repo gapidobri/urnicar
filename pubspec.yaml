@@ -29,6 +29,7 @@ dev_dependencies:
   riverpod_generator: ^3.0.3
   build_runner: ^2.10.4
   hive_ce_generator: ^1.10.0
+  flutter_launcher_icons: ^0.14.4
 
 
 flutter:
