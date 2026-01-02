@@ -21,6 +21,8 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
   final eventsController = DefaultEventsController<Event>();
   final calendarController = CalendarController<Event>();
 
+  bool editMode = false;
+
   final now = DateTime.now();
   late final displayRange = DateTimeRange(
     start: now.subtract(const Duration(days: 363)),
@@ -66,26 +68,68 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      floatingActionButton: editMode
+          ? FloatingActionButton(
+        onPressed: () {
+          setState(() {
+            editMode = false;
+          });
+        },
+        child: const Icon(Icons.check),
+      )
+          : null,
       // glavni calendar widget
       body: CalendarView<Event>(
         eventsController: eventsController,
         calendarController: calendarController,
         viewConfiguration: viewConfiguration,
         callbacks: CalendarCallbacks<Event>(
-          onEventTapped: (event, _) => calendarController.selectEvent(event),
-          onEventCreate: (event) => event,
-          onEventCreated: (event) => eventsController.addEvent(event),
+          onEventTapped: (event, _) =>
+              calendarController.selectEvent(event),
+          onEventCreate: editMode ? (event) => event : null,
+          onEventCreated: editMode
+              ? (event) => eventsController.addEvent(event)
+              : null,
         ),
         header: Material(
           child: Column(
             children: [
               topToolbar(),
               _calendarToolbar(),
+              if (editMode)
+                const Padding(
+                  padding: EdgeInsets.all(4),
+                  child: Text(
+                    "Urejanje urnika",
+                    style: TextStyle(
+                      color: Colors.redAccent,
+                    ),
+                  ),
+                ),
               const CalendarHeader<Event>(),
             ],
           ),
         ),
-        body: const CalendarBody<Event>(),
+        body: CalendarBody<Event>(
+          calendarController: calendarController,
+          eventsController: eventsController,
+          multiDayTileComponents: TileComponents<Event>(
+            tileBuilder: (event, tileRange) {
+              return Container(
+                margin: const EdgeInsets.all(2),
+                padding: const EdgeInsets.all(4),
+                decoration: BoxDecoration(
+                  color: Colors.blue,
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: Text(
+                  event.data!.title,
+                  style: const TextStyle(color: Colors.white),
+                ),
+              );
+            },
+          ),
+        ),
       ),
     );
   }
@@ -125,6 +169,22 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
         padding: const EdgeInsets.all(8.0),
         child: Row(
           children: [
+            PopupMenuButton<String>(
+              icon: const CircleAvatar(
+                child: Icon(Icons.person, size: 18),
+              ),
+              onSelected: (value) {
+                if (value == "login") {
+                  // context.push('/login');
+                }
+              },
+              itemBuilder: (context) => const [
+                PopupMenuItem(
+                  value: "login",
+                  child: Text("Vpis"),
+                ),
+              ],
+            ),
             Expanded(
               flex: 8,
               child: DropdownButton<String>(
@@ -154,16 +214,21 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
             const SizedBox(width: 8),
             Expanded(
               flex: 2,
-              child: SizedBox(
-                height: 40,
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    shape: const CircleBorder(),
-                    padding: EdgeInsets.zero,
+              child: PopupMenuButton<String>(
+                icon: const Icon(Icons.menu),
+                onSelected: (value) {
+                  if (value == "edit") {
+                    setState(() {
+                      editMode = true;
+                    });
+                  }
+                },
+                itemBuilder: (context) => const [
+                  PopupMenuItem(
+                    value: "edit",
+                    child: Text("Uredi"),
                   ),
-                  onPressed: () {},
-                  child: const Icon(Icons.menu),
-                ),
+                ],
               ),
             ),
           ],
