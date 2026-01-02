@@ -1,4 +1,4 @@
-import 'package:urnicar/data/timetable/timetable_scraper.dart';
+import 'package:urnicar/data/remote_timetable/timetable_scraper.dart';
 
 class TimetableRecord {
   final String sourceTimetableId;

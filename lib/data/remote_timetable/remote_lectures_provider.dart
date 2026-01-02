@@ -3,7 +3,7 @@ import 'dart:isolate';
 import 'package:collection/collection.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:urnicar/data/remote_timetable/remote_timetable_data_provider.dart';
-import 'package:urnicar/data/timetable/timetable_scraper.dart';
+import 'package:urnicar/data/remote_timetable/timetable_scraper.dart';
 
 part 'remote_lectures_provider.g.dart';
 

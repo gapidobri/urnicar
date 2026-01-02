@@ -49,7 +49,9 @@ class TimetableScraper {
 
       switch (type) {
         case 'teacher':
-          teachers.add(Teacher(id: id, name: e.text));
+          teachers.add(
+            Teacher(id: id, name: e.text.split(', ').reversed.join(' ')),
+          );
           break;
         case 'classroom':
           classrooms.add(Classroom(id: id, name: e.text));
@@ -58,7 +60,12 @@ class TimetableScraper {
           groups.add(Group(id: id, name: e.text));
           break;
         case 'subject':
-          subjects.add(Subject(id: id, name: e.text));
+          subjects.add(
+            Subject(
+              id: id,
+              name: e.text.replaceFirst(RegExp(r'\(.*\)'), '').trim(),
+            ),
+          );
           break;
       }
     }
@@ -182,6 +189,19 @@ class Subject {
   final String name;
 
   const Subject({required this.id, required this.name});
+
+  String get acronym {
+    if (name.contains('DevOps')) {
+      return 'DevOps';
+    }
+
+    final excludedWords = ['in'];
+    return name
+        .split(' ')
+        .where((p) => !excludedWords.contains(p))
+        .map((p) => p.substring(0, 1).toUpperCase())
+        .join();
+  }
 
   Subject copyWith({String? id, String? name}) =>
       Subject(id: id ?? this.id, name: name ?? this.name);

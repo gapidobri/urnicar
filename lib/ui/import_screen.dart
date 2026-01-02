@@ -1,10 +1,15 @@
 import 'dart:async';
 
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:urnicar/data/remote_timetable/remote_lectures_provider.dart';
 import 'package:urnicar/data/remote_timetable/remote_timetables_provider.dart';
-import 'package:urnicar/data/timetable/timetable_scraper.dart';
+import 'package:urnicar/data/remote_timetable/timetable_scraper.dart';
+import 'package:urnicar/data/timetable/timetable_record.dart';
+import 'package:urnicar/data/timetable/timetables_provider.dart';
+import 'package:uuid/uuid.dart';
 
 class ImportScreen extends ConsumerStatefulWidget {
   const ImportScreen({super.key});
@@ -18,6 +23,57 @@ class _ImportScreenState extends ConsumerState<ImportScreen> {
   String? studentId;
 
   Timer? studentIdDebounce;
+
+  void handleImportTimetable() async {
+    if (timetableId == null || studentId == null) return;
+
+    final existingTimetable = ref
+        .read(timetablesProvider)
+        .firstWhereOrNull((t) => t.sourceTimetableId == timetableId!);
+    if (existingTimetable != null) {
+      final doContinue = await showDialog<bool>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Text('Urnik obstaja'),
+          content: Text(
+            'Urnik, ki ga želiš uvoziti že obstaja. Ali vseeno želiš nadaljevati?',
+          ),
+          actions: [
+            TextButton(onPressed: () => context.pop(false), child: Text('Ne')),
+            TextButton(onPressed: () => context.pop(true), child: Text('Da')),
+          ],
+        ),
+      );
+      if (!(doContinue ?? false)) return;
+    }
+
+    final remoteTimetables = await ref.read(remoteTimetablesProvider.future);
+
+    final remoteTimetable = remoteTimetables.firstWhereOrNull(
+      (t) => t.id == timetableId!,
+    );
+
+    final lectures = await ref.read(
+      remoteLecturesProvider
+          .call(timetableId!, FilterType.student, studentId!)
+          .future,
+    );
+
+    final timetable = TimetableRecord(
+      sourceTimetableId: timetableId!,
+      sourceFilterType: FilterType.student,
+      sourceId: studentId!,
+      id: Uuid().v4(),
+      name: remoteTimetable?.name ?? 'Nov urnik',
+      lectures: lectures,
+    );
+
+    await ref.read(timetablesProvider.notifier).createTimetable(timetable);
+
+    if (mounted) {
+      context.pop();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -43,7 +99,10 @@ class _ImportScreenState extends ConsumerState<ImportScreen> {
                     for (final timetable in timetables)
                       DropdownMenuItem(
                         value: timetable.id,
-                        child: Text(timetable.name),
+                        child: Text(
+                          timetable.name,
+                          overflow: TextOverflow.ellipsis,
+                        ),
                       ),
                   ],
                   onChanged: (value) => setState(() => timetableId = value),
@@ -65,7 +124,7 @@ class _ImportScreenState extends ConsumerState<ImportScreen> {
               },
             ),
 
-            SizedBox(height: 8.0),
+            SizedBox(height: 16.0),
 
             lecturesPreview(),
 
@@ -73,7 +132,9 @@ class _ImportScreenState extends ConsumerState<ImportScreen> {
 
             SafeArea(
               child: ElevatedButton(
-                onPressed: () {},
+                onPressed: timetableId != null && studentId != null
+                    ? handleImportTimetable
+                    : null,
                 child: Text('Uvozi urnik'),
               ),
             ),
