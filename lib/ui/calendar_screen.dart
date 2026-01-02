@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:kalender/kalender.dart';
 import 'package:urnicar/data/remote_timetable/timetable_scraper.dart';
+import 'package:urnicar/data/timetable/optimiser.dart';
 import 'package:urnicar/data/timetable/timetables_provider.dart';
 
 class CalendarScreen extends ConsumerStatefulWidget {
@@ -61,7 +62,11 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
         .firstWhereOrNull((t) => t.id == selectedTimetableId);
     if (timetable == null) return;
 
+    // for testing purposes (to get different optimised timetable change the index)
+    // final optTimetable = TimetableOptimiser.minimiseOverlapAndGap(timetable.lectures)[0]; 
+    
     final startOfWeek = DateTime.now().startOfWeek();
+    // final events = optTimetable.map((lecture) {
     final events = timetable.lectures.map((lecture) {
       final day = startOfWeek.addDays(lecture.day.value);
       return CalendarEvent<Lecture>(

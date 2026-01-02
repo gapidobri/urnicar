@@ -6,7 +6,7 @@ import 'package:urnicar/data/remote_timetable/timetable_scraper.dart';
 class TimetableOptimiser {
   static List<List<Lecture>> minimiseOverlap(List<Lecture> rawTimetable) {
     final subjectsMap = <String, List<Lecture>>{};
-    final timetable = List<List<Lecture>>.filled(5, []);
+    final timetable = List<List<Lecture>>.generate(5, (_) => []);
 
     for (final lecture in rawTimetable) {
       if (lecture.type == LectureType.lecture) {
@@ -24,17 +24,15 @@ class TimetableOptimiser {
     int bestOverlap = 99999;
     List<List<Lecture>> bestTimetables = [];
     for (final lectures in _allCombinations(subjectsMap.values.toList())) {
-      final testTimetable = List<List<Lecture>>.filled(5, []);
+      final testTimetable = timetable.map(List<Lecture>.from).toList();
 
-      // deep-ish copy (if we were to change data from individual lectures
-      // this needs to be changed)
-      for (int i = 0; i < 5; i++) {
-        testTimetable[i] = List.from(timetable[i]);
-      }
+      // print(testTimetable[0].length + testTimetable[1].length + testTimetable[2].length + testTimetable[3].length + testTimetable[4].length);
 
       for (Lecture lecture in lectures) {
-        testTimetable[lecture.day.value] = lectures;
+        testTimetable[lecture.day.value].add(lecture);
       }
+
+      print(testTimetable[0].length + testTimetable[1].length + testTimetable[2].length + testTimetable[3].length + testTimetable[4].length);
 
       final int overlap = _getOverlap(testTimetable);
       if (overlap < bestOverlap) {
@@ -53,7 +51,7 @@ class TimetableOptimiser {
 
   static List<List<Lecture>> minimiseOverlapAndGap(List<Lecture> rawTimetable) {
     final subjectsMap = <String, List<Lecture>>{};
-    final timetable = List<List<Lecture>>.filled(5, []);
+    final timetable = List<List<Lecture>>.generate(5, (_) => []);
 
     for (final lecture in rawTimetable) {
       if (lecture.type == LectureType.lecture) {
@@ -72,16 +70,10 @@ class TimetableOptimiser {
     int bestGap = 99999;
     List<List<Lecture>> bestTimetables = [];
     for (final lectures in _allCombinations(subjectsMap.values.toList())) {
-      final testTimetable = List<List<Lecture>>.filled(5, []);
-
-      // deep-ish copy (if we were to change data from individual lectures
-      // this needs to be changed)
-      for (int i = 0; i < 5; i++) {
-        testTimetable[i] = List.from(timetable[i]);
-      }
+      final testTimetable = timetable.map(List<Lecture>.from).toList();
 
       for (Lecture lecture in lectures) {
-        testTimetable[lecture.day.value] = lectures;
+        testTimetable[lecture.day.value].add(lecture);
       }
 
       final (overlap, gap) = _getOverlapAndGap(testTimetable);
