@@ -37,6 +37,6 @@ final _router = GoRouter(
     GoRoute(path: '/', builder: (context, state) => CalendarScreen()),
     GoRoute(path: '/import', builder: (context, state) => ImportScreen()),
     GoRoute(path: '/login', builder: (context, state) => LoginScreen()),
-    GoRoute(path: '/register', builder: (context, state) => RegisterScreen())
+    GoRoute(path: '/register', builder: (context, state) => RegisterScreen()),
   ],
 );

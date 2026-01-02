@@ -1,6 +1,7 @@
 import 'dart:collection';
 import 'dart:math';
-import 'package:urnicar/data/timetable/timetable_scraper.dart';
+
+import 'package:urnicar/data/remote_timetable/timetable_scraper.dart';
 
 class TimetableOptimiser {
   static List<List<Lecture>> minimiseOverlap(List<Lecture> rawTimetable) {
@@ -20,7 +21,6 @@ class TimetableOptimiser {
       subjectsMap[lecture.subject.id]?.add(lecture);
     }
 
-
     int bestOverlap = 99999;
     List<List<Lecture>> bestTimetables = [];
     for (final lectures in _allCombinations(subjectsMap.values.toList())) {
@@ -31,12 +31,12 @@ class TimetableOptimiser {
       for (int i = 0; i < 5; i++) {
         testTimetable[i] = List.from(timetable[i]);
       }
-      
+
       for (Lecture lecture in lectures) {
         testTimetable[lecture.day.value] = lectures;
       }
 
-      final int overlap = _getOverlap(testTimetable); 
+      final int overlap = _getOverlap(testTimetable);
       if (overlap < bestOverlap) {
         bestOverlap = overlap;
         bestTimetables = [];
@@ -68,7 +68,6 @@ class TimetableOptimiser {
       subjectsMap[lecture.subject.id]?.add(lecture);
     }
 
-
     int bestOverlap = 99999;
     int bestGap = 99999;
     List<List<Lecture>> bestTimetables = [];
@@ -80,12 +79,12 @@ class TimetableOptimiser {
       for (int i = 0; i < 5; i++) {
         testTimetable[i] = List.from(timetable[i]);
       }
-      
+
       for (Lecture lecture in lectures) {
         testTimetable[lecture.day.value] = lectures;
       }
 
-      final (overlap, gap) = _getOverlapAndGap(testTimetable); 
+      final (overlap, gap) = _getOverlapAndGap(testTimetable);
       if (overlap < bestOverlap) {
         bestOverlap = overlap;
         bestGap = gap;
@@ -138,7 +137,10 @@ class TimetableOptimiser {
           final a = dayTimetable[i];
           final b = dayTimetable[j];
 
-          overlap += max(0, min(a.time.end, b.time.end) - max(a.time.start, b.time.start));
+          overlap += max(
+            0,
+            min(a.time.end, b.time.end) - max(a.time.start, b.time.start),
+          );
         }
       }
     }
@@ -185,5 +187,4 @@ class TimetableOptimiser {
     }
     return (overlap, gap);
   }
-
 }
