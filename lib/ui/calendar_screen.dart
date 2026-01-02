@@ -29,9 +29,19 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
     super.initState();
 
     final displayRange = DateTime.now().weekRange();
+    final timeOfDayRange = TimeOfDayRange(
+      start: TimeOfDay(hour: 6, minute: 0),
+      end: TimeOfDay(hour: 21, minute: 0),
+    );
     viewConfigurations = [
-      MultiDayViewConfiguration.singleDay(displayRange: displayRange),
-      MultiDayViewConfiguration.workWeek(displayRange: displayRange),
+      MultiDayViewConfiguration.singleDay(
+        displayRange: displayRange,
+        timeOfDayRange: timeOfDayRange,
+      ),
+      MultiDayViewConfiguration.workWeek(
+        displayRange: displayRange,
+        timeOfDayRange: timeOfDayRange,
+      ),
     ];
     viewConfiguration = viewConfigurations[1];
   }
@@ -55,6 +65,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
     final events = timetable.lectures.map((lecture) {
       final day = startOfWeek.addDays(lecture.day.value);
       return CalendarEvent<Lecture>(
+        canModify: false,
         dateTimeRange: DateTimeRange(
           start: day.add(Duration(hours: lecture.time.start)),
           end: day.add(Duration(hours: lecture.time.end)),
@@ -111,16 +122,53 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
           eventsController: eventsController,
           multiDayTileComponents: TileComponents(
             tileBuilder: (event, tileRange) {
+              final lecture = event.data!;
               return Container(
                 margin: const EdgeInsets.all(2),
                 padding: const EdgeInsets.all(4),
                 decoration: BoxDecoration(
-                  color: Colors.blue,
-                  borderRadius: BorderRadius.circular(6),
+                  color: HSLColor.fromAHSL(
+                    1,
+                    lecture.subject.acronym.hashCode % 360,
+                    0.5,
+                    0.5,
+                  ).toColor(),
+                  borderRadius: BorderRadius.circular(6.0),
                 ),
-                child: Text(
-                  event.data?.subject.acronym ?? 'Other',
-                  style: const TextStyle(color: Colors.white),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      lecture.subject.acronym,
+                      overflow: TextOverflow.clip,
+                      maxLines: 1,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 12.0,
+                      ),
+                    ),
+                    Text(
+                      lecture.classroom.name,
+                      overflow: TextOverflow.clip,
+                      maxLines: 1,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 12.0,
+                      ),
+                    ),
+                    if (viewConfiguration.name == 'Day')
+                      for (final teacher in lecture.teachers)
+                        Text(
+                          teacher.name,
+                          overflow: TextOverflow.clip,
+                          maxLines: 1,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 12.0,
+                          ),
+                        ),
+                  ],
                 ),
               );
             },
@@ -205,14 +253,22 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
               child: PopupMenuButton<String>(
                 icon: const Icon(Icons.menu),
                 onSelected: (value) {
-                  if (value == "edit") {
-                    setState(() {
-                      editMode = true;
-                    });
+                  switch (value) {
+                    case 'edit':
+                      setState(() => editMode = true);
+                      break;
+                    case 'delete':
+                      if (selectedTimetableId != null) {
+                        ref
+                            .read(timetablesProvider.notifier)
+                            .deleteTimetable(selectedTimetableId!);
+                      }
+                      break;
                   }
                 },
                 itemBuilder: (context) => const [
-                  PopupMenuItem(value: "edit", child: Text("Uredi")),
+                  PopupMenuItem(value: 'edit', child: Text('Uredi')),
+                  PopupMenuItem(value: 'delete', child: Text('Izbriši')),
                 ],
               ),
             ),
