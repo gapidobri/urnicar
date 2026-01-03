@@ -4,9 +4,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:kalender/kalender.dart';
 import 'package:urnicar/data/remote_timetable/timetable_scraper.dart';
-import 'package:urnicar/data/timetable/optimiser.dart';
 import 'package:urnicar/data/timetable/timetables_provider.dart';
 import 'package:urnicar/ui/lecture_tile.dart';
+import 'package:urnicar/ui/temporary_calendar_screen.dart';
 
 class CalendarScreen extends ConsumerStatefulWidget {
   const CalendarScreen({super.key});
@@ -53,7 +53,6 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
       return;
     }
     setState(() => selectedTimetableId = value);
-
     eventsController.clearEvents();
 
     final timetable = ref
@@ -81,6 +80,32 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
     eventsController.addEvents(events);
   }
 
+  // for ontap in lecture detail popup
+  void openTemporaryCalendar({
+    required BuildContext context,
+    required WidgetRef ref,
+    required String selectedTimetableId,
+    required FilterType filterType,
+    required String filterId,
+    required String title,
+  }) {
+    final timetable = ref
+        .read(timetablesProvider)
+        .firstWhere((t) => t.id == selectedTimetableId);
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => TemporaryCalendarScreen(
+          timetableId: timetable.sourceTimetableId,
+          filterType: filterType,
+          filterId: filterId,
+          title: title,
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -89,7 +114,74 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
         calendarController: calendarController,
         viewConfiguration: viewConfiguration,
         callbacks: CalendarCallbacks(
-          onEventTapped: (event, _) => calendarController.selectEvent(event),
+          onEventTapped: (event, _) {
+            final lecture = event.data;
+            if (lecture == null) return;
+            print(lecture.type.toString());
+            String lectureType =
+              lecture.type.name.toString() == "lecture" ? "Predavanje" : "Vaje";
+            List<String> days = ["Ponedeljek", "Torek", "Sreda", "Četrtek", "Petek"];
+            String lectureDay = days[lecture.day.index];
+            String timestr = "$lectureDay ${lecture.time.start.toString().padLeft(2, '0')}:00 - ${lecture.time.end.toString().padLeft(2, '0')}:00";
+
+            showDialog(context: context, builder: (_) => AlertDialog(
+              title:
+                InkWell(
+                  child: Text("${lecture.subject.name} - $lectureType"),
+                  onTap: () {
+                    Navigator.pop(context);
+                    openTemporaryCalendar(
+                      context: context,
+                      ref: ref,
+                      selectedTimetableId: selectedTimetableId!,
+                      filterType: FilterType.subject,
+                      filterId: lecture.subject.id,
+                      title: lecture.subject.name,
+                    );
+                  }
+
+                ),
+
+              content: Column (
+                mainAxisSize: MainAxisSize.min,
+
+                children: [
+                  Text(timestr),
+                  InkWell(
+                    child: Text(lecture.classroom.name),
+                    onTap: () {
+                      Navigator.pop(context);
+                      openTemporaryCalendar(
+                        context: context,
+                        ref: ref,
+                        selectedTimetableId: selectedTimetableId!,
+                        filterType: FilterType.classroom,
+                        filterId: lecture.classroom.id,
+                        title: lecture.classroom.name,
+                      );
+                    }
+                  ),
+
+                  for (final teacher in lecture.teachers)
+                    InkWell(
+                      child: Text(teacher.name),
+                        onTap: () {
+                          Navigator.pop(context);
+                          openTemporaryCalendar(
+                            context: context,
+                            ref: ref,
+                            selectedTimetableId: selectedTimetableId!,
+                            filterType: FilterType.teacher,
+                            filterId: teacher.id,
+                            title: teacher.name,
+                          );
+                        }
+                    )
+                ],
+              ),
+            ));
+          },
+
         ),
         header: Column(
           children: [
