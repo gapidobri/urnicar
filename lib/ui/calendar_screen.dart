@@ -18,8 +18,6 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
   final eventsController = DefaultEventsController<Lecture>();
   final calendarController = CalendarController<Lecture>();
 
-  bool editMode = false;
-
   late ViewConfiguration viewConfiguration;
   late final List<ViewConfiguration> viewConfigurations;
 
@@ -85,36 +83,17 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      floatingActionButton: editMode
-          ? FloatingActionButton(
-              onPressed: () => setState(() => editMode = false),
-              child: const Icon(Icons.check),
-            )
-          : null,
-
       body: CalendarView<Lecture>(
         eventsController: eventsController,
         calendarController: calendarController,
         viewConfiguration: viewConfiguration,
         callbacks: CalendarCallbacks(
           onEventTapped: (event, _) => calendarController.selectEvent(event),
-          onEventCreate: editMode ? (event) => event : null,
-          onEventCreated: editMode
-              ? (event) => eventsController.addEvent(event)
-              : null,
         ),
         header: Column(
           children: [
             topToolbar(),
             calendarToolbar(),
-            if (editMode)
-              const Padding(
-                padding: EdgeInsets.all(4),
-                child: Text(
-                  'Urejanje urnika',
-                  style: TextStyle(color: Colors.redAccent),
-                ),
-              ),
             const CalendarHeader<Lecture>(
               multiDayHeaderConfiguration: MultiDayHeaderConfiguration(
                 showTiles: false,
@@ -260,7 +239,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                 onSelected: (value) {
                   switch (value) {
                     case 'edit':
-                      setState(() => editMode = true);
+                      context.push('/edit');
                       break;
                     case 'delete':
                       if (selectedTimetableId != null) {

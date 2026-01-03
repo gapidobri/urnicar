@@ -6,6 +6,7 @@ import 'package:urnicar/data/timetable/timetable_record.dart';
 import 'package:urnicar/hive/boxes.dart';
 import 'package:urnicar/hive/hive_registrar.g.dart';
 import 'package:urnicar/ui/calendar_screen.dart';
+import 'package:urnicar/ui/edit_screen.dart';
 import 'package:urnicar/ui/import_screen.dart';
 import 'package:urnicar/ui/login_screen.dart';
 import 'package:urnicar/ui/register_screen.dart';
@@ -38,5 +39,6 @@ final _router = GoRouter(
     GoRoute(path: '/import', builder: (context, state) => ImportScreen()),
     GoRoute(path: '/login', builder: (context, state) => LoginScreen()),
     GoRoute(path: '/register', builder: (context, state) => RegisterScreen()),
+    GoRoute(path: '/edit', builder: (context, state) => EditScreen()),
   ],
 );
