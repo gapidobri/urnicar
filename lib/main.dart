@@ -39,6 +39,10 @@ final _router = GoRouter(
     GoRoute(path: '/import', builder: (context, state) => ImportScreen()),
     GoRoute(path: '/login', builder: (context, state) => LoginScreen()),
     GoRoute(path: '/register', builder: (context, state) => RegisterScreen()),
-    GoRoute(path: '/edit', builder: (context, state) => EditScreen()),
+    GoRoute(
+      path: '/edit/:timetableId',
+      builder: (context, state) =>
+          EditScreen(timetableId: state.pathParameters['timetableId']!),
+    ),
   ],
 );

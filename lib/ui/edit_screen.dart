@@ -4,12 +4,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:kalender/kalender.dart';
 import 'package:urnicar/data/remote_timetable/timetable_scraper.dart';
-import 'package:urnicar/data/timetable/optimiser.dart';
 import 'package:urnicar/data/timetable/timetables_provider.dart';
 import 'package:urnicar/ui/lecture_tile.dart';
 
 class EditScreen extends ConsumerStatefulWidget {
-  const EditScreen({super.key});
+  const EditScreen({super.key, required this.timetableId});
+
+  final String timetableId;
 
   @override
   ConsumerState<EditScreen> createState() => EditScreenState();
@@ -40,7 +41,9 @@ class EditScreenState extends ConsumerState<EditScreen> {
   }
 
   void loadTimetable() {
-    final timetable = ref.read(timetablesProvider).firstOrNull;
+    final timetable = ref
+        .read(timetablesProvider)
+        .firstWhereOrNull((t) => t.id == widget.timetableId);
     if (timetable == null) return;
 
     final startOfWeek = DateTime.now().startOfWeek();
@@ -77,10 +80,7 @@ class EditScreenState extends ConsumerState<EditScreen> {
       appBar: AppBar(
         title: const Text('Urejanje urnika'),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.check),
-            onPressed: saveAndExit,
-          ),
+          IconButton(icon: const Icon(Icons.check), onPressed: saveAndExit),
         ],
       ),
       body: CalendarView<Lecture>(
@@ -88,15 +88,14 @@ class EditScreenState extends ConsumerState<EditScreen> {
         calendarController: calendarController,
         viewConfiguration: viewConfiguration,
         callbacks: CalendarCallbacks(
-          onEventTapped: (event, _) =>
-              calendarController.selectEvent(event),
+          onEventTapped: (event, _) => calendarController.selectEvent(event),
           onEventCreate: (event) => event,
-          onEventCreated: (event) =>
-              eventsController.addEvent(event),
+          onEventCreated: (event) => eventsController.addEvent(event),
         ),
         header: const CalendarHeader<Lecture>(
-          multiDayHeaderConfiguration:
-          MultiDayHeaderConfiguration(showTiles: false),
+          multiDayHeaderConfiguration: MultiDayHeaderConfiguration(
+            showTiles: false,
+          ),
         ),
         body: CalendarBody<Lecture>(
           calendarController: calendarController,

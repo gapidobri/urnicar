@@ -8,6 +8,8 @@ import 'package:urnicar/data/timetable/timetables_provider.dart';
 import 'package:urnicar/ui/lecture_tile.dart';
 import 'package:urnicar/ui/temporary_calendar_screen.dart';
 
+final _weekNames = ['Pon', 'Tor', 'Sre', 'Čet', 'Pet', 'Sob', 'Ned'];
+
 class CalendarScreen extends ConsumerStatefulWidget {
   const CalendarScreen({super.key});
 
@@ -60,11 +62,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
         .firstWhereOrNull((t) => t.id == selectedTimetableId);
     if (timetable == null) return;
 
-    // for testing purposes (to get different optimised timetable change the index)
-    // final optTimetable = TimetableOptimiser.minimiseOverlapAndGap(timetable.lectures)[0]; 
-    
     final startOfWeek = DateTime.now().startOfWeek();
-    // final events = optTimetable.map((lecture) {
     final events = timetable.lectures.map((lecture) {
       final day = startOfWeek.addDays(lecture.day.value);
       return CalendarEvent<Lecture>(
@@ -113,6 +111,17 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
         eventsController: eventsController,
         calendarController: calendarController,
         viewConfiguration: viewConfiguration,
+        components: CalendarComponents(
+          multiDayComponents: MultiDayComponents(
+            headerComponents: MultiDayHeaderComponents(
+              weekNumberBuilder: (date, _) => SizedBox(),
+              dayHeaderBuilder: (date, _) => Padding(
+                padding: const EdgeInsets.only(bottom: 8.0),
+                child: Text(_weekNames[date.weekday - 1]),
+              ),
+            ),
+          ),
+        ),
         callbacks: CalendarCallbacks(
           onEventTapped: (event, _) {
             final lecture = event.data;
@@ -271,7 +280,6 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                 ],
                 onChanged: handleTimetableChange,
                 isExpanded: true,
-                // isExpanded: true,
               ),
             ),
             const SizedBox(width: 8),
@@ -282,7 +290,9 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                 onSelected: (value) {
                   switch (value) {
                     case 'edit':
-                      context.push('/edit');
+                      if (selectedTimetableId != null) {
+                        context.push('/edit/$selectedTimetableId');
+                      }
                       break;
                     case 'delete':
                       if (selectedTimetableId != null) {

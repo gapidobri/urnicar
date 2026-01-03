@@ -61,8 +61,7 @@ class _ImportScreenState extends ConsumerState<ImportScreen> {
 
     final timetable = TimetableRecord(
       sourceTimetableId: timetableId!,
-      sourceFilterType: FilterType.student,
-      sourceId: studentId!,
+      studentId: studentId!,
       id: Uuid().v4(),
       name: remoteTimetable?.name ?? 'Nov urnik',
       lectures: lectures,

@@ -70,8 +70,7 @@ class TimetableRecordAdapter extends TypeAdapter<TimetableRecord> {
     };
     return TimetableRecord(
       sourceTimetableId: fields[0] as String,
-      sourceFilterType: fields[1] as FilterType,
-      sourceId: fields[2] as String,
+      studentId: fields[6] as String,
       id: fields[3] as String,
       name: fields[4] as String,
       lectures: (fields[5] as List).cast<Lecture>(),
@@ -81,19 +80,17 @@ class TimetableRecordAdapter extends TypeAdapter<TimetableRecord> {
   @override
   void write(BinaryWriter writer, TimetableRecord obj) {
     writer
-      ..writeByte(6)
+      ..writeByte(5)
       ..writeByte(0)
       ..write(obj.sourceTimetableId)
-      ..writeByte(1)
-      ..write(obj.sourceFilterType)
-      ..writeByte(2)
-      ..write(obj.sourceId)
       ..writeByte(3)
       ..write(obj.id)
       ..writeByte(4)
       ..write(obj.name)
       ..writeByte(5)
-      ..write(obj.lectures);
+      ..write(obj.lectures)
+      ..writeByte(6)
+      ..write(obj.studentId);
   }
 
   @override

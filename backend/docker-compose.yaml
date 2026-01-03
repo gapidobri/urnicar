@@ -1,0 +1,13 @@
+name: urnicar
+
+services:
+  pocketbase:
+    image: elestio/pocketbase
+    restart: always
+    ports:
+      - "8090:8090"
+    volumes:
+      - data:/pb_data
+
+volumes:
+  data:

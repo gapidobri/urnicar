@@ -1,5 +1,8 @@
 import 'package:html/parser.dart' as parser;
 import 'package:http/http.dart' as http;
+import 'package:json_annotation/json_annotation.dart';
+
+part 'timetable_scraper.g.dart';
 
 class TimetableScraper {
   static const _baseUrl = 'https://urnik.fri.uni-lj.si/timetable';
@@ -145,6 +148,7 @@ class Timetable {
   String toString() => 'Timetable(id: $id, name: $name)';
 }
 
+@JsonSerializable()
 class Teacher {
   final String id;
   final String name;
@@ -154,10 +158,16 @@ class Teacher {
   Teacher copyWith({String? id, String? name}) =>
       Teacher(id: id ?? this.id, name: name ?? this.name);
 
+  factory Teacher.fromJson(Map<String, dynamic> json) =>
+      _$TeacherFromJson(json);
+
+  Map<String, dynamic> toJson() => _$TeacherToJson(this);
+
   @override
   String toString() => 'Teacher(id: $id, name: $name)';
 }
 
+@JsonSerializable()
 class Classroom {
   final String id;
   final String name;
@@ -167,10 +177,16 @@ class Classroom {
   Classroom copyWith({String? id, String? name}) =>
       Classroom(id: id ?? this.id, name: name ?? this.name);
 
+  factory Classroom.fromJson(Map<String, dynamic> json) =>
+      _$ClassroomFromJson(json);
+
+  Map<String, dynamic> toJson() => _$ClassroomToJson(this);
+
   @override
   String toString() => 'Classroom(id: $id, name: $name)';
 }
 
+@JsonSerializable()
 class Group {
   final String id;
   final String name;
@@ -180,10 +196,15 @@ class Group {
   Group copyWith({String? id, String? name}) =>
       Group(id: id ?? this.id, name: name ?? this.name);
 
+  factory Group.fromJson(Map<String, dynamic> json) => _$GroupFromJson(json);
+
+  Map<String, dynamic> toJson() => _$GroupToJson(this);
+
   @override
   String toString() => 'Group(id: $id, name: $name)';
 }
 
+@JsonSerializable()
 class Subject {
   final String id;
   final String name;
@@ -205,6 +226,11 @@ class Subject {
 
   Subject copyWith({String? id, String? name}) =>
       Subject(id: id ?? this.id, name: name ?? this.name);
+
+  factory Subject.fromJson(Map<String, dynamic> json) =>
+      _$SubjectFromJson(json);
+
+  Map<String, dynamic> toJson() => _$SubjectToJson(this);
 
   @override
   String toString() => 'Subject(id: $id, name: $name)';
@@ -237,6 +263,7 @@ enum DayOfWeek {
   }
 }
 
+@JsonSerializable()
 class HourRange {
   final int start;
   final int end;
@@ -244,6 +271,11 @@ class HourRange {
   const HourRange({required this.start, required this.end});
 
   int get duration => end - start;
+
+  factory HourRange.fromJson(Map<String, dynamic> json) =>
+      _$HourRangeFromJson(json);
+
+  Map<String, dynamic> toJson() => _$HourRangeToJson(this);
 
   @override
   String toString() =>
@@ -292,6 +324,7 @@ enum LectureType {
   }
 }
 
+@JsonSerializable()
 class Lecture {
   final String id;
   final DayOfWeek day;
@@ -328,6 +361,11 @@ class Lecture {
     subject: subject ?? this.subject,
     type: type ?? this.type,
   );
+
+  factory Lecture.fromJson(Map<String, dynamic> json) =>
+      _$LectureFromJson(json);
+
+  Map<String, dynamic> toJson() => _$LectureToJson(this);
 
   @override
   String toString() =>
