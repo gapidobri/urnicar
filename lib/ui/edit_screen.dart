@@ -6,6 +6,7 @@ import 'package:kalender/kalender.dart';
 import 'package:urnicar/data/remote_timetable/timetable_scraper.dart';
 import 'package:urnicar/data/timetable/optimiser.dart';
 import 'package:urnicar/data/timetable/timetables_provider.dart';
+import 'package:urnicar/ui/lecture_tile.dart';
 
 class EditScreen extends ConsumerStatefulWidget {
   const EditScreen({super.key});
@@ -101,44 +102,7 @@ class EditScreenState extends ConsumerState<EditScreen> {
           calendarController: calendarController,
           eventsController: eventsController,
           multiDayTileComponents: TileComponents(
-            tileBuilder: (event, tileRange) {
-              final lecture = event.data!;
-              return Container(
-                margin: const EdgeInsets.all(2),
-                padding: const EdgeInsets.all(4),
-                decoration: BoxDecoration(
-                  color: HSLColor.fromAHSL(
-                    1,
-                    lecture.subject.acronym.hashCode % 360,
-                    0.5,
-                    0.5,
-                  ).toColor(),
-                  borderRadius: BorderRadius.circular(6.0),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      lecture.subject.acronym,
-                      maxLines: 1,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 12,
-                      ),
-                    ),
-                    Text(
-                      lecture.classroom.name,
-                      maxLines: 1,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 12,
-                      ),
-                    ),
-                  ],
-                ),
-              );
-            },
+            tileBuilder: (event, tileRange) => LectureTile(event: event),
           ),
         ),
       ),
