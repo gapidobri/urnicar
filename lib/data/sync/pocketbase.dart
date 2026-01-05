@@ -7,7 +7,7 @@ Future<void> initPocketBase() async {
   final initial = await secureStorage.read(key: 'auth');
 
   pb = PocketBase(
-    'http://10.10.0.20:8090',
+    'https://urnicar.gapi.me',
     authStore: AsyncAuthStore(
       save: (data) => secureStorage.write(key: 'auth', value: data),
       clear: () => secureStorage.delete(key: 'auth'),
