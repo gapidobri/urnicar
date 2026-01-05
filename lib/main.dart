@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:hive_ce/hive.dart';
 import 'package:hive_ce_flutter/adapters.dart';
+import 'package:urnicar/data/sync/pocketbase.dart';
 import 'package:urnicar/data/timetable/timetable_record.dart';
 import 'package:urnicar/hive/boxes.dart';
 import 'package:urnicar/hive/hive_registrar.g.dart';
@@ -16,6 +18,8 @@ void main() async {
   Hive.registerAdapters();
 
   timetablesBox = await Hive.openBox<TimetableRecord>('timetables');
+
+  await initPocketBase();
 
   runApp(const ProviderScope(child: App()));
 }

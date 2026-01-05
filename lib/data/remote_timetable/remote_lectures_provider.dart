@@ -1,6 +1,5 @@
 import 'dart:isolate';
 
-import 'package:collection/collection.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:urnicar/data/remote_timetable/remote_timetable_data_provider.dart';
 import 'package:urnicar/data/remote_timetable/timetable_scraper.dart';
@@ -29,20 +28,10 @@ Future<List<Lecture>> remoteLectures(
         .map(
           (lecture) => lecture.copyWith(
             teachers: lecture.teachers
-                .map(
-                  (teacher) => teacher.copyWith(
-                    name: timetableData.teachers
-                        .firstWhereOrNull((t) => t.id == teacher.id)
-                        ?.name,
-                  ),
-                )
+                .map((teacher) => timetableData.teachers[teacher.id]!)
                 .toList(),
-            classroom: timetableData.classrooms.firstWhereOrNull(
-              (c) => c.id == lecture.classroom.id,
-            ),
-            subject: timetableData.subjects.firstWhereOrNull(
-              (s) => s.id == lecture.subject.id,
-            ),
+            classroom: timetableData.classrooms[lecture.classroom.id],
+            subject: timetableData.subjects[lecture.subject.id],
           ),
         )
         .toList(),

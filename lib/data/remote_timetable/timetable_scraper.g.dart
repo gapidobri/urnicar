@@ -6,7 +6,7 @@ part of 'timetable_scraper.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-Teacher _$TeacherFromJson(Map<String, dynamic> json) =>
+Teacher _$TeacherFromJson(Map json) =>
     Teacher(id: json['id'] as String, name: json['name'] as String);
 
 Map<String, dynamic> _$TeacherToJson(Teacher instance) => <String, dynamic>{
@@ -14,7 +14,7 @@ Map<String, dynamic> _$TeacherToJson(Teacher instance) => <String, dynamic>{
   'name': instance.name,
 };
 
-Classroom _$ClassroomFromJson(Map<String, dynamic> json) =>
+Classroom _$ClassroomFromJson(Map json) =>
     Classroom(id: json['id'] as String, name: json['name'] as String);
 
 Map<String, dynamic> _$ClassroomToJson(Classroom instance) => <String, dynamic>{
@@ -22,7 +22,7 @@ Map<String, dynamic> _$ClassroomToJson(Classroom instance) => <String, dynamic>{
   'name': instance.name,
 };
 
-Group _$GroupFromJson(Map<String, dynamic> json) =>
+Group _$GroupFromJson(Map json) =>
     Group(id: json['id'] as String, name: json['name'] as String);
 
 Map<String, dynamic> _$GroupToJson(Group instance) => <String, dynamic>{
@@ -30,7 +30,7 @@ Map<String, dynamic> _$GroupToJson(Group instance) => <String, dynamic>{
   'name': instance.name,
 };
 
-Subject _$SubjectFromJson(Map<String, dynamic> json) =>
+Subject _$SubjectFromJson(Map json) =>
     Subject(id: json['id'] as String, name: json['name'] as String);
 
 Map<String, dynamic> _$SubjectToJson(Subject instance) => <String, dynamic>{
@@ -38,7 +38,7 @@ Map<String, dynamic> _$SubjectToJson(Subject instance) => <String, dynamic>{
   'name': instance.name,
 };
 
-HourRange _$HourRangeFromJson(Map<String, dynamic> json) => HourRange(
+HourRange _$HourRangeFromJson(Map json) => HourRange(
   start: (json['start'] as num).toInt(),
   end: (json['end'] as num).toInt(),
 );
@@ -48,25 +48,27 @@ Map<String, dynamic> _$HourRangeToJson(HourRange instance) => <String, dynamic>{
   'end': instance.end,
 };
 
-Lecture _$LectureFromJson(Map<String, dynamic> json) => Lecture(
+Lecture _$LectureFromJson(Map json) => Lecture(
   id: json['id'] as String,
   day: $enumDecode(_$DayOfWeekEnumMap, json['day']),
-  time: HourRange.fromJson(json['time'] as Map<String, dynamic>),
+  time: HourRange.fromJson(Map<String, dynamic>.from(json['time'] as Map)),
   teachers: (json['teachers'] as List<dynamic>)
-      .map((e) => Teacher.fromJson(e as Map<String, dynamic>))
+      .map((e) => Teacher.fromJson(Map<String, dynamic>.from(e as Map)))
       .toList(),
-  classroom: Classroom.fromJson(json['classroom'] as Map<String, dynamic>),
-  subject: Subject.fromJson(json['subject'] as Map<String, dynamic>),
+  classroom: Classroom.fromJson(
+    Map<String, dynamic>.from(json['classroom'] as Map),
+  ),
+  subject: Subject.fromJson(Map<String, dynamic>.from(json['subject'] as Map)),
   type: $enumDecode(_$LectureTypeEnumMap, json['type']),
 );
 
 Map<String, dynamic> _$LectureToJson(Lecture instance) => <String, dynamic>{
   'id': instance.id,
   'day': _$DayOfWeekEnumMap[instance.day]!,
-  'time': instance.time,
-  'teachers': instance.teachers,
-  'classroom': instance.classroom,
-  'subject': instance.subject,
+  'time': instance.time.toJson(),
+  'teachers': instance.teachers.map((e) => e.toJson()).toList(),
+  'classroom': instance.classroom.toJson(),
+  'subject': instance.subject.toJson(),
   'type': _$LectureTypeEnumMap[instance.type]!,
 };
 

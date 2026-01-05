@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:kalender/kalender.dart';
+
 import '../data/remote_timetable/remote_lectures_provider.dart';
 import '../data/remote_timetable/timetable_scraper.dart';
-import 'lecture_tile.dart';
+import 'widgets/lecture_tile.dart';
 
 class TemporaryCalendarScreen extends ConsumerStatefulWidget {
   final String timetableId;
@@ -31,8 +32,6 @@ class _TemporaryCalendarScreenState
   late final Future<List<Lecture>> _futureLectures;
   late final ViewConfiguration viewConfiguration;
 
-
-
   //for ontap in lecture detail popup, selectedTimetableId replaced by timetableId
   void openTemporaryCalendar({
     required BuildContext context,
@@ -42,7 +41,6 @@ class _TemporaryCalendarScreenState
     required String filterId,
     required String title,
   }) {
-
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -55,6 +53,7 @@ class _TemporaryCalendarScreenState
       ),
     );
   }
+
   @override
   void initState() {
     super.initState();
@@ -120,15 +119,24 @@ class _TemporaryCalendarScreenState
                 final lecture = event.data;
                 if (lecture == null) return;
                 print(lecture.type.toString());
-                String lectureType =
-                lecture.type.name.toString() == "lecture" ? "Predavanje" : "Vaje";
-                List<String> days = ["Ponedeljek", "Torek", "Sreda", "Četrtek", "Petek"];
+                String lectureType = lecture.type.name.toString() == "lecture"
+                    ? "Predavanje"
+                    : "Vaje";
+                List<String> days = [
+                  "Ponedeljek",
+                  "Torek",
+                  "Sreda",
+                  "Četrtek",
+                  "Petek",
+                ];
                 String lectureDay = days[lecture.day.index];
-                String timestr = "$lectureDay ${lecture.time.start.toString().padLeft(2, '0')}:00 - ${lecture.time.end.toString().padLeft(2, '0')}:00";
+                String timestr =
+                    "$lectureDay ${lecture.time.start.toString().padLeft(2, '0')}:00 - ${lecture.time.end.toString().padLeft(2, '0')}:00";
 
-                showDialog(context: context, builder: (_) => AlertDialog(
-                  title:
-                  InkWell(
+                showDialog(
+                  context: context,
+                  builder: (_) => AlertDialog(
+                    title: InkWell(
                       child: Text("${lecture.subject.name} - $lectureType"),
                       onTap: () {
                         Navigator.pop(context);
@@ -140,16 +148,15 @@ class _TemporaryCalendarScreenState
                           title: lecture.subject.name,
                           timetableId: widget.timetableId,
                         );
-                      }
+                      },
+                    ),
 
-                  ),
+                    content: Column(
+                      mainAxisSize: MainAxisSize.min,
 
-                  content: Column (
-                    mainAxisSize: MainAxisSize.min,
-
-                    children: [
-                      Text(timestr),
-                      InkWell(
+                      children: [
+                        Text(timestr),
+                        InkWell(
                           child: Text(lecture.classroom.name),
                           onTap: () {
                             Navigator.pop(context);
@@ -161,11 +168,11 @@ class _TemporaryCalendarScreenState
                               title: lecture.classroom.name,
                               timetableId: widget.timetableId,
                             );
-                          }
-                      ),
+                          },
+                        ),
 
-                      for (final teacher in lecture.teachers)
-                        InkWell(
+                        for (final teacher in lecture.teachers)
+                          InkWell(
                             child: Text(teacher.name),
                             onTap: () {
                               Navigator.pop(context);
@@ -177,11 +184,12 @@ class _TemporaryCalendarScreenState
                                 title: teacher.name,
                                 timetableId: widget.timetableId,
                               );
-                            }
-                        )
-                    ],
+                            },
+                          ),
+                      ],
+                    ),
                   ),
-                ));
+                );
               },
             ),
             header: const CalendarHeader<Lecture>(
@@ -194,8 +202,7 @@ class _TemporaryCalendarScreenState
               calendarController: calendarController,
               eventsController: eventsController,
               multiDayTileComponents: TileComponents(
-                tileBuilder: (event, range) =>
-                    LectureTile(event: event),
+                tileBuilder: (event, range) => LectureTile(event: event),
               ),
             ),
           );

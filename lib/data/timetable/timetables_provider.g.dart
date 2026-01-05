@@ -10,11 +10,11 @@ part of 'timetables_provider.dart';
 // ignore_for_file: type=lint, type=warning
 
 @ProviderFor(Timetables)
-const timetablesProvider = TimetablesProvider._();
+final timetablesProvider = TimetablesProvider._();
 
 final class TimetablesProvider
     extends $NotifierProvider<Timetables, List<TimetableRecord>> {
-  const TimetablesProvider._()
+  TimetablesProvider._()
     : super(
         from: null,
         argument: null,
@@ -41,14 +41,13 @@ final class TimetablesProvider
   }
 }
 
-String _$timetablesHash() => r'91a053072156dd105b871f694ffdb252c915c003';
+String _$timetablesHash() => r'c90e304be733f48c47789b188d3e6fae571d7caa';
 
 abstract class _$Timetables extends $Notifier<List<TimetableRecord>> {
   List<TimetableRecord> build();
   @$mustCallSuper
   @override
   void runBuild() {
-    final created = build();
     final ref = this.ref as $Ref<List<TimetableRecord>, List<TimetableRecord>>;
     final element =
         ref.element
@@ -58,6 +57,6 @@ abstract class _$Timetables extends $Notifier<List<TimetableRecord>> {
               Object?,
               Object?
             >;
-    element.handleValue(ref, created);
+    element.handleCreate(ref, build);
   }
 }

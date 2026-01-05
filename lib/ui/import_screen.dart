@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 import 'package:urnicar/data/remote_timetable/remote_lectures_provider.dart';
 import 'package:urnicar/data/remote_timetable/remote_timetables_provider.dart';
 import 'package:urnicar/data/remote_timetable/timetable_scraper.dart';
+import 'package:urnicar/data/sync/pocketbase.dart';
 import 'package:urnicar/data/timetable/timetable_record.dart';
 import 'package:urnicar/data/timetable/timetables_provider.dart';
 import 'package:uuid/uuid.dart';
@@ -23,6 +24,16 @@ class _ImportScreenState extends ConsumerState<ImportScreen> {
   String? studentId;
 
   Timer? studentIdDebounce;
+
+  final studentIdController = TextEditingController();
+
+  @override
+  void initState() {
+    studentId = pb.authStore.record?.getStringValue('studentId');
+    studentIdController.text = studentId ?? '';
+
+    super.initState();
+  }
 
   void handleImportTimetable() async {
     if (timetableId == null || studentId == null) return;
@@ -65,6 +76,7 @@ class _ImportScreenState extends ConsumerState<ImportScreen> {
       id: Uuid().v4(),
       name: remoteTimetable?.name ?? 'Nov urnik',
       lectures: lectures,
+      updated: DateTime.now(),
     );
 
     await ref.read(timetablesProvider.notifier).createTimetable(timetable);
@@ -111,6 +123,7 @@ class _ImportScreenState extends ConsumerState<ImportScreen> {
             SizedBox(height: 8.0),
 
             TextField(
+              controller: studentIdController,
               decoration: InputDecoration(label: Text('Vpisna številka')),
               onChanged: (value) {
                 if (studentIdDebounce?.isActive ?? false) {

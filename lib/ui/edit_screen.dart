@@ -5,7 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:kalender/kalender.dart';
 import 'package:urnicar/data/remote_timetable/timetable_scraper.dart';
 import 'package:urnicar/data/timetable/timetables_provider.dart';
-import 'package:urnicar/ui/lecture_tile.dart';
+import 'package:urnicar/ui/widgets/lecture_tile.dart';
 
 class EditScreen extends ConsumerStatefulWidget {
   const EditScreen({super.key, required this.timetableId});

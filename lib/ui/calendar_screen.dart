@@ -4,9 +4,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:kalender/kalender.dart';
 import 'package:urnicar/data/remote_timetable/timetable_scraper.dart';
+import 'package:urnicar/data/sync/pocketbase.dart';
 import 'package:urnicar/data/timetable/timetables_provider.dart';
-import 'package:urnicar/ui/lecture_tile.dart';
 import 'package:urnicar/ui/temporary_calendar_screen.dart';
+import 'package:urnicar/ui/widgets/lecture_tile.dart';
+import 'package:urnicar/ui/widgets/profile_dialog.dart';
 
 final _weekNames = ['Pon', 'Tor', 'Sre', 'Čet', 'Pet', 'Sob', 'Ned'];
 
@@ -49,7 +51,10 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
   }
 
   void handleTimetableChange(String? value) {
-    if (value == null) return;
+    if (value == null) {
+      eventsController.clearEvents();
+      return;
+    }
     if (value == 'import') {
       context.push('/import');
       return;
@@ -78,7 +83,6 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
     eventsController.addEvents(events);
   }
 
-  // for ontap in lecture detail popup
   void openTemporaryCalendar({
     required BuildContext context,
     required WidgetRef ref,
@@ -126,16 +130,19 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
           onEventTapped: (event, _) {
             final lecture = event.data;
             if (lecture == null) return;
-            print(lecture.type.toString());
-            String lectureType =
-              lecture.type.name.toString() == "lecture" ? "Predavanje" : "Vaje";
-            List<String> days = ["Ponedeljek", "Torek", "Sreda", "Četrtek", "Petek"];
-            String lectureDay = days[lecture.day.index];
-            String timestr = "$lectureDay ${lecture.time.start.toString().padLeft(2, '0')}:00 - ${lecture.time.end.toString().padLeft(2, '0')}:00";
 
-            showDialog(context: context, builder: (_) => AlertDialog(
-              title:
-                InkWell(
+            final lectureType = lecture.type.name.toString() == "lecture"
+                ? "Predavanje"
+                : "Vaje";
+            final days = ["Ponedeljek", "Torek", "Sreda", "Četrtek", "Petek"];
+            final lectureDay = days[lecture.day.index];
+            final timeStr =
+                "$lectureDay ${lecture.time.start.toString().padLeft(2, '0')}:00 - ${lecture.time.end.toString().padLeft(2, '0')}:00";
+
+            showDialog(
+              context: context,
+              builder: (_) => AlertDialog(
+                title: InkWell(
                   child: Text("${lecture.subject.name} - $lectureType"),
                   onTap: () {
                     Navigator.pop(context);
@@ -147,33 +154,31 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                       filterId: lecture.subject.id,
                       title: lecture.subject.name,
                     );
-                  }
-
+                  },
                 ),
 
-              content: Column (
-                mainAxisSize: MainAxisSize.min,
-
-                children: [
-                  Text(timestr),
-                  InkWell(
-                    child: Text(lecture.classroom.name),
-                    onTap: () {
-                      Navigator.pop(context);
-                      openTemporaryCalendar(
-                        context: context,
-                        ref: ref,
-                        selectedTimetableId: selectedTimetableId!,
-                        filterType: FilterType.classroom,
-                        filterId: lecture.classroom.id,
-                        title: lecture.classroom.name,
-                      );
-                    }
-                  ),
-
-                  for (final teacher in lecture.teachers)
+                content: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(timeStr),
                     InkWell(
-                      child: Text(teacher.name),
+                      child: Text(lecture.classroom.name),
+                      onTap: () {
+                        Navigator.pop(context);
+                        openTemporaryCalendar(
+                          context: context,
+                          ref: ref,
+                          selectedTimetableId: selectedTimetableId!,
+                          filterType: FilterType.classroom,
+                          filterId: lecture.classroom.id,
+                          title: lecture.classroom.name,
+                        );
+                      },
+                    ),
+
+                    for (final teacher in lecture.teachers)
+                      InkWell(
+                        child: Text(teacher.name),
                         onTap: () {
                           Navigator.pop(context);
                           openTemporaryCalendar(
@@ -184,13 +189,13 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                             filterId: teacher.id,
                             title: teacher.name,
                           );
-                        }
-                    )
-                ],
+                        },
+                      ),
+                  ],
+                ),
               ),
-            ));
+            );
           },
-
         ),
         header: Column(
           children: [
@@ -239,20 +244,23 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
     return SafeArea(
       bottom: false,
       child: Padding(
-        padding: const EdgeInsets.all(8.0),
+        padding: const EdgeInsets.all(2.0),
         child: Row(
           children: [
-            PopupMenuButton<String>(
-              icon: const CircleAvatar(child: Icon(Icons.person, size: 18)),
-              onSelected: (value) {
-                if (value == "login") {
+            IconButton(
+              onPressed: () {
+                if (pb.authStore.isValid) {
+                  showDialog(
+                    context: context,
+                    builder: (context) => ProfileDialog(),
+                  );
+                } else {
                   context.push('/login');
                 }
               },
-              itemBuilder: (context) => const [
-                PopupMenuItem(value: "login", child: Text("Vpis")),
-              ],
+              icon: const CircleAvatar(child: Icon(Icons.person, size: 18)),
             ),
+            SizedBox(width: 2.0),
             Expanded(
               flex: 8,
               child: DropdownButton<String>(
@@ -299,6 +307,8 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                         ref
                             .read(timetablesProvider.notifier)
                             .deleteTimetable(selectedTimetableId!);
+                        eventsController.clearEvents();
+                        setState(() => selectedTimetableId = null);
                       }
                       break;
                   }

@@ -10,7 +10,7 @@ part of 'remote_timetables_provider.dart';
 // ignore_for_file: type=lint, type=warning
 
 @ProviderFor(remoteTimetables)
-const remoteTimetablesProvider = RemoteTimetablesProvider._();
+final remoteTimetablesProvider = RemoteTimetablesProvider._();
 
 final class RemoteTimetablesProvider
     extends
@@ -20,7 +20,7 @@ final class RemoteTimetablesProvider
           FutureOr<List<Timetable>>
         >
     with $FutureModifier<List<Timetable>>, $FutureProvider<List<Timetable>> {
-  const RemoteTimetablesProvider._()
+  RemoteTimetablesProvider._()
     : super(
         from: null,
         argument: null,

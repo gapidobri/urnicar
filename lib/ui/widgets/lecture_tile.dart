@@ -3,13 +3,14 @@ import 'package:kalender/kalender.dart';
 import 'package:urnicar/data/remote_timetable/timetable_scraper.dart';
 
 class LectureTile extends StatelessWidget {
-  final CalendarEvent<Lecture> event;
-
   const LectureTile({super.key, required this.event});
+
+  final CalendarEvent<Lecture> event;
 
   @override
   Widget build(BuildContext context) {
     final lecture = event.data!;
+
     return Container(
       margin: const EdgeInsets.all(2),
       padding: const EdgeInsets.all(4),
@@ -37,10 +38,7 @@ class LectureTile extends StatelessWidget {
           Text(
             lecture.classroom.name,
             maxLines: 1,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 12,
-            ),
+            style: const TextStyle(color: Colors.white, fontSize: 12),
           ),
         ],
       ),

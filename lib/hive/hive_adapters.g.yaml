@@ -23,7 +23,7 @@ types:
         index: 6
   TimetableRecord:
     typeId: 2
-    nextIndex: 7
+    nextIndex: 9
     fields:
       sourceTimetableId:
         index: 0
@@ -35,6 +35,8 @@ types:
         index: 5
       studentId:
         index: 6
+      updated:
+        index: 8
   FilterType:
     typeId: 3
     nextIndex: 5

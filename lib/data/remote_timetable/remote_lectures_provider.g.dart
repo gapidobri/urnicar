@@ -10,7 +10,7 @@ part of 'remote_lectures_provider.dart';
 // ignore_for_file: type=lint, type=warning
 
 @ProviderFor(remoteLectures)
-const remoteLecturesProvider = RemoteLecturesFamily._();
+final remoteLecturesProvider = RemoteLecturesFamily._();
 
 final class RemoteLecturesProvider
     extends
@@ -20,7 +20,7 @@ final class RemoteLecturesProvider
           FutureOr<List<Lecture>>
         >
     with $FutureModifier<List<Lecture>>, $FutureProvider<List<Lecture>> {
-  const RemoteLecturesProvider._({
+  RemoteLecturesProvider._({
     required RemoteLecturesFamily super.from,
     required (String, FilterType, String) super.argument,
   }) : super(
@@ -64,7 +64,7 @@ final class RemoteLecturesProvider
   }
 }
 
-String _$remoteLecturesHash() => r'3f04439fca0f549d96b62f24d5126244b4f40af9';
+String _$remoteLecturesHash() => r'614789148d30fa5d47c5ac8b2c95f49a1731ad3c';
 
 final class RemoteLecturesFamily extends $Family
     with
@@ -72,7 +72,7 @@ final class RemoteLecturesFamily extends $Family
           FutureOr<List<Lecture>>,
           (String, FilterType, String)
         > {
-  const RemoteLecturesFamily._()
+  RemoteLecturesFamily._()
     : super(
         retry: null,
         name: r'remoteLecturesProvider',

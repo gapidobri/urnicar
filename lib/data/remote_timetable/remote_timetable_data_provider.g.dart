@@ -10,7 +10,7 @@ part of 'remote_timetable_data_provider.dart';
 // ignore_for_file: type=lint, type=warning
 
 @ProviderFor(remoteTimetableData)
-const remoteTimetableDataProvider = RemoteTimetableDataFamily._();
+final remoteTimetableDataProvider = RemoteTimetableDataFamily._();
 
 final class RemoteTimetableDataProvider
     extends
@@ -20,7 +20,7 @@ final class RemoteTimetableDataProvider
           FutureOr<TimetableData>
         >
     with $FutureModifier<TimetableData>, $FutureProvider<TimetableData> {
-  const RemoteTimetableDataProvider._({
+  RemoteTimetableDataProvider._({
     required RemoteTimetableDataFamily super.from,
     required String super.argument,
   }) : super(
@@ -69,7 +69,7 @@ String _$remoteTimetableDataHash() =>
 
 final class RemoteTimetableDataFamily extends $Family
     with $FunctionalFamilyOverride<FutureOr<TimetableData>, String> {
-  const RemoteTimetableDataFamily._()
+  RemoteTimetableDataFamily._()
     : super(
         retry: null,
         name: r'remoteTimetableDataProvider',

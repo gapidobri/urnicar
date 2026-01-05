@@ -38,10 +38,10 @@ class TimetableScraper {
 
     final elements = document.querySelectorAll('table a');
 
-    final teachers = <Teacher>[];
-    final classrooms = <Classroom>[];
-    final groups = <Group>[];
-    final subjects = <Subject>[];
+    final teachers = <String, Teacher>{};
+    final classrooms = <String, Classroom>{};
+    final groups = <String, Group>{};
+    final subjects = <String, Subject>{};
 
     final regex = RegExp(r'\?(.*)=(.*)');
 
@@ -52,22 +52,21 @@ class TimetableScraper {
 
       switch (type) {
         case 'teacher':
-          teachers.add(
-            Teacher(id: id, name: e.text.split(', ').reversed.join(' ')),
+          teachers[id] = Teacher(
+            id: id,
+            name: e.text.split(', ').reversed.join(' '),
           );
           break;
         case 'classroom':
-          classrooms.add(Classroom(id: id, name: e.text));
+          classrooms[id] = Classroom(id: id, name: e.text);
           break;
         case 'group':
-          groups.add(Group(id: id, name: e.text));
+          groups[id] = Group(id: id, name: e.text);
           break;
         case 'subject':
-          subjects.add(
-            Subject(
-              id: id,
-              name: e.text.replaceFirst(RegExp(r'\(.*\)'), '').trim(),
-            ),
+          subjects[id] = Subject(
+            id: id,
+            name: e.text.replaceFirst(RegExp(r'\(.*\)'), '').trim(),
           );
           break;
       }
@@ -143,9 +142,6 @@ class Timetable {
   final String name;
 
   const Timetable({required this.id, required this.name});
-
-  @override
-  String toString() => 'Timetable(id: $id, name: $name)';
 }
 
 @JsonSerializable()
@@ -162,9 +158,6 @@ class Teacher {
       _$TeacherFromJson(json);
 
   Map<String, dynamic> toJson() => _$TeacherToJson(this);
-
-  @override
-  String toString() => 'Teacher(id: $id, name: $name)';
 }
 
 @JsonSerializable()
@@ -181,9 +174,6 @@ class Classroom {
       _$ClassroomFromJson(json);
 
   Map<String, dynamic> toJson() => _$ClassroomToJson(this);
-
-  @override
-  String toString() => 'Classroom(id: $id, name: $name)';
 }
 
 @JsonSerializable()
@@ -199,9 +189,6 @@ class Group {
   factory Group.fromJson(Map<String, dynamic> json) => _$GroupFromJson(json);
 
   Map<String, dynamic> toJson() => _$GroupToJson(this);
-
-  @override
-  String toString() => 'Group(id: $id, name: $name)';
 }
 
 @JsonSerializable()
@@ -231,9 +218,6 @@ class Subject {
       _$SubjectFromJson(json);
 
   Map<String, dynamic> toJson() => _$SubjectToJson(this);
-
-  @override
-  String toString() => 'Subject(id: $id, name: $name)';
 }
 
 enum DayOfWeek {
@@ -276,10 +260,6 @@ class HourRange {
       _$HourRangeFromJson(json);
 
   Map<String, dynamic> toJson() => _$HourRangeToJson(this);
-
-  @override
-  String toString() =>
-      '${start.toString().padLeft(2, '0')} - ${end.toString().padLeft(2, '0')}';
 }
 
 enum FilterType {
@@ -295,10 +275,10 @@ enum FilterType {
 }
 
 class TimetableData {
-  final List<Teacher> teachers;
-  final List<Classroom> classrooms;
-  final List<Group> groups;
-  final List<Subject> subjects;
+  final Map<String, Teacher> teachers;
+  final Map<String, Classroom> classrooms;
+  final Map<String, Group> groups;
+  final Map<String, Subject> subjects;
 
   const TimetableData({
     required this.teachers,
@@ -366,16 +346,4 @@ class Lecture {
       _$LectureFromJson(json);
 
   Map<String, dynamic> toJson() => _$LectureToJson(this);
-
-  @override
-  String toString() =>
-      '''Lecture(
-  id: $id
-  day: $day
-  time: $time
-  teachers: $teachers
-  classroom: $classroom
-  subject: $subject
-  type: $type
-)''';
 }
