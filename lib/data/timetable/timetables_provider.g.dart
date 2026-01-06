@@ -13,7 +13,7 @@ part of 'timetables_provider.dart';
 final timetablesProvider = TimetablesProvider._();
 
 final class TimetablesProvider
-    extends $NotifierProvider<Timetables, List<TimetableRecord>> {
+    extends $NotifierProvider<Timetables, Map<String, TimetableRecord>> {
   TimetablesProvider._()
     : super(
         from: null,
@@ -33,27 +33,32 @@ final class TimetablesProvider
   Timetables create() => Timetables();
 
   /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(List<TimetableRecord> value) {
+  Override overrideWithValue(Map<String, TimetableRecord> value) {
     return $ProviderOverride(
       origin: this,
-      providerOverride: $SyncValueProvider<List<TimetableRecord>>(value),
+      providerOverride: $SyncValueProvider<Map<String, TimetableRecord>>(value),
     );
   }
 }
 
-String _$timetablesHash() => r'c90e304be733f48c47789b188d3e6fae571d7caa';
+String _$timetablesHash() => r'db0f670d6580733aba8bcda26f685cf4303157f6';
 
-abstract class _$Timetables extends $Notifier<List<TimetableRecord>> {
-  List<TimetableRecord> build();
+abstract class _$Timetables extends $Notifier<Map<String, TimetableRecord>> {
+  Map<String, TimetableRecord> build();
   @$mustCallSuper
   @override
   void runBuild() {
-    final ref = this.ref as $Ref<List<TimetableRecord>, List<TimetableRecord>>;
+    final ref =
+        this.ref
+            as $Ref<Map<String, TimetableRecord>, Map<String, TimetableRecord>>;
     final element =
         ref.element
             as $ClassProviderElement<
-              AnyNotifier<List<TimetableRecord>, List<TimetableRecord>>,
-              List<TimetableRecord>,
+              AnyNotifier<
+                Map<String, TimetableRecord>,
+                Map<String, TimetableRecord>
+              >,
+              Map<String, TimetableRecord>,
               Object?,
               Object?
             >;

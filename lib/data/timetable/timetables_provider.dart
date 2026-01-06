@@ -10,8 +10,12 @@ part 'timetables_provider.g.dart';
 @riverpod
 class Timetables extends _$Timetables {
   @override
-  List<TimetableRecord> build() {
-    return timetablesBox.values.toList();
+  Map<String, TimetableRecord> build() {
+    return Map.from(timetablesBox.toMap());
+  }
+
+  void _updateState() {
+    state = Map.from(timetablesBox.toMap());
   }
 
   Future<void> createTimetable(TimetableRecord timetable) async {
@@ -20,7 +24,7 @@ class Timetables extends _$Timetables {
     }
 
     await timetablesBox.put(timetable.id, timetable);
-    state = timetablesBox.values.toList();
+    _updateState();
 
     if (pb.authStore.isValid) {
       await pb
@@ -31,13 +35,13 @@ class Timetables extends _$Timetables {
     }
   }
 
-  void updateTimetable(TimetableRecord timetable) async {
+  Future<void> updateTimetable(TimetableRecord timetable) async {
     if (pb.authStore.isValid) {
       timetable = timetable.copyWith(user: pb.authStore.record!.id);
     }
 
     await timetablesBox.put(timetable.id, timetable);
-    state = timetablesBox.values.toList();
+    _updateState();
 
     if (pb.authStore.isValid) {
       await pb
@@ -59,9 +63,7 @@ class Timetables extends _$Timetables {
     final updateRemote = <TimetableRecord>[];
 
     for (final remoteTimetable in remoteTimetables) {
-      final localTimetable = state.firstWhereOrNull(
-        (t) => t.id == remoteTimetable.id,
-      );
+      final localTimetable = state[remoteTimetable.id];
       if (localTimetable == null ||
           remoteTimetable.updated.isAfter(localTimetable.updated)) {
         updateLocal[remoteTimetable.id] = remoteTimetable;
@@ -69,7 +71,7 @@ class Timetables extends _$Timetables {
         updateRemote.add(localTimetable);
       }
     }
-    for (final localTimetable in state) {
+    for (final localTimetable in state.values) {
       final remoteTimetable = remoteTimetables.firstWhereOrNull(
         (t) => t.id == localTimetable.id,
       );
@@ -96,12 +98,12 @@ class Timetables extends _$Timetables {
       ),
     ]);
 
-    state = timetablesBox.values.toList();
+    _updateState();
   }
 
   void deleteTimetable(String id) async {
     await timetablesBox.delete(id);
-    state = timetablesBox.values.toList();
+    _updateState();
 
     if (pb.authStore.isValid) {
       await pb.collection('timetables').delete(id);
@@ -110,6 +112,6 @@ class Timetables extends _$Timetables {
 
   Future<void> clearLocal() async {
     await timetablesBox.clear();
-    state = [];
+    state = {};
   }
 }

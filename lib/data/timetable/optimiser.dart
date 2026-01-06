@@ -32,7 +32,7 @@ class TimetableOptimiser {
         testTimetable[lecture.day.value].add(lecture);
       }
 
-      print(testTimetable[0].length + testTimetable[1].length + testTimetable[2].length + testTimetable[3].length + testTimetable[4].length);
+      // print(testTimetable[0].length + testTimetable[1].length + testTimetable[2].length + testTimetable[3].length + testTimetable[4].length);
 
       final int overlap = _getOverlap(testTimetable);
       if (overlap < bestOverlap) {

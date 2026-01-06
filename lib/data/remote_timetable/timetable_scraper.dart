@@ -1,3 +1,4 @@
+import 'package:equatable/equatable.dart';
 import 'package:html/parser.dart' as parser;
 import 'package:http/http.dart' as http;
 import 'package:json_annotation/json_annotation.dart';
@@ -137,15 +138,18 @@ class TimetableScraper {
   }
 }
 
-class Timetable {
+class Timetable extends Equatable {
   final String id;
   final String name;
 
   const Timetable({required this.id, required this.name});
+
+  @override
+  List<Object> get props => [id, name];
 }
 
 @JsonSerializable()
-class Teacher {
+class Teacher extends Equatable {
   final String id;
   final String name;
 
@@ -154,6 +158,9 @@ class Teacher {
   Teacher copyWith({String? id, String? name}) =>
       Teacher(id: id ?? this.id, name: name ?? this.name);
 
+  @override
+  List<Object> get props => [id, name];
+
   factory Teacher.fromJson(Map<String, dynamic> json) =>
       _$TeacherFromJson(json);
 
@@ -161,7 +168,7 @@ class Teacher {
 }
 
 @JsonSerializable()
-class Classroom {
+class Classroom extends Equatable {
   final String id;
   final String name;
 
@@ -169,6 +176,9 @@ class Classroom {
 
   Classroom copyWith({String? id, String? name}) =>
       Classroom(id: id ?? this.id, name: name ?? this.name);
+
+  @override
+  List<Object> get props => [id, name];
 
   factory Classroom.fromJson(Map<String, dynamic> json) =>
       _$ClassroomFromJson(json);
@@ -192,7 +202,7 @@ class Group {
 }
 
 @JsonSerializable()
-class Subject {
+class Subject extends Equatable {
   final String id;
   final String name;
 
@@ -213,6 +223,9 @@ class Subject {
 
   Subject copyWith({String? id, String? name}) =>
       Subject(id: id ?? this.id, name: name ?? this.name);
+
+  @override
+  List<Object> get props => [id, name];
 
   factory Subject.fromJson(Map<String, dynamic> json) =>
       _$SubjectFromJson(json);
@@ -248,13 +261,16 @@ enum DayOfWeek {
 }
 
 @JsonSerializable()
-class HourRange {
+class HourRange extends Equatable {
   final int start;
   final int end;
 
   const HourRange({required this.start, required this.end});
 
   int get duration => end - start;
+
+  @override
+  List<Object> get props => [start, end];
 
   factory HourRange.fromJson(Map<String, dynamic> json) =>
       _$HourRangeFromJson(json);
@@ -305,7 +321,7 @@ enum LectureType {
 }
 
 @JsonSerializable()
-class Lecture {
+class Lecture extends Equatable {
   final String id;
   final DayOfWeek day;
   final HourRange time;
@@ -341,6 +357,9 @@ class Lecture {
     subject: subject ?? this.subject,
     type: type ?? this.type,
   );
+
+  @override
+  List<Object> get props => [id, day, time, teachers, classroom, subject, type];
 
   factory Lecture.fromJson(Map<String, dynamic> json) =>
       _$LectureFromJson(json);

@@ -21,6 +21,15 @@ class TimetableRecord {
     required this.updated,
   });
 
+  Set<Subject> get subjects {
+    final subjects = <Subject>{};
+    for (final lecture in lectures) {
+      subjects.add(lecture.subject);
+    }
+
+    return subjects;
+  }
+
   TimetableRecord copyWith({
     String? sourceTimetableId,
     String? studentId,

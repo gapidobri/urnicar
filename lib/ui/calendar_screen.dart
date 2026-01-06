@@ -1,4 +1,3 @@
-import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -50,21 +49,8 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
     viewConfiguration = viewConfigurations[1];
   }
 
-  void handleTimetableChange(String? value) {
-    if (value == null) {
-      eventsController.clearEvents();
-      return;
-    }
-    if (value == 'import') {
-      context.push('/import');
-      return;
-    }
-    setState(() => selectedTimetableId = value);
-    eventsController.clearEvents();
-
-    final timetable = ref
-        .read(timetablesProvider)
-        .firstWhereOrNull((t) => t.id == selectedTimetableId);
+  void loadLectures() {
+    final timetable = ref.read(timetablesProvider)[selectedTimetableId];
     if (timetable == null) return;
 
     final startOfWeek = DateTime.now().startOfWeek();
@@ -80,7 +66,22 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
       );
     }).toList();
 
+    eventsController.clearEvents();
     eventsController.addEvents(events);
+  }
+
+  void handleTimetableChange(String? value) {
+    if (value == null) {
+      eventsController.clearEvents();
+      return;
+    }
+    if (value == 'import') {
+      context.push('/import');
+      return;
+    }
+    setState(() => selectedTimetableId = value);
+
+    loadLectures();
   }
 
   void openTemporaryCalendar({
@@ -91,9 +92,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
     required String filterId,
     required String title,
   }) {
-    final timetable = ref
-        .read(timetablesProvider)
-        .firstWhere((t) => t.id == selectedTimetableId);
+    final timetable = ref.read(timetablesProvider)[selectedTimetableId]!;
 
     Navigator.push(
       context,
@@ -110,6 +109,12 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
 
   @override
   Widget build(BuildContext context) {
+    ref.listen(timetablesProvider, (prev, curr) {
+      if (prev?[selectedTimetableId] != curr[selectedTimetableId]) {
+        loadLectures();
+      }
+    });
+
     return Scaffold(
       body: CalendarView<Lecture>(
         eventsController: eventsController,
@@ -267,7 +272,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                 value: selectedTimetableId,
                 hint: const Text("Izberi urnik"),
                 items: [
-                  for (final timetable in ref.watch(timetablesProvider))
+                  for (final timetable in ref.watch(timetablesProvider).values)
                     DropdownMenuItem(
                       value: timetable.id,
                       child: Text(
