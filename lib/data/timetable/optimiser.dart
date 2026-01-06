@@ -160,7 +160,7 @@ class TimetableOptimiser {
             break;
           }
 
-          max(0, min(b, d) - max(a, c));
+          overlap += max(0, min(b, d) - max(a, c));
           intervals.remove((c, d));
           a = min(a, c);
           b = max(b, d);
