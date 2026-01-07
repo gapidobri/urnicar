@@ -6,10 +6,9 @@ import 'package:urnicar/data/remote_timetable/timetable_scraper.dart';
 import 'package:urnicar/data/sync/pocketbase.dart';
 import 'package:urnicar/data/timetable/timetables_provider.dart';
 import 'package:urnicar/ui/temporary_calendar_screen.dart';
+import 'package:urnicar/ui/widgets/calendar_components.dart';
 import 'package:urnicar/ui/widgets/lecture_tile.dart';
 import 'package:urnicar/ui/widgets/profile_dialog.dart';
-
-final _weekNames = ['Pon', 'Tor', 'Sre', 'Čet', 'Pet', 'Sob', 'Ned'];
 
 class CalendarScreen extends ConsumerStatefulWidget {
   const CalendarScreen({super.key});
@@ -120,17 +119,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
         eventsController: eventsController,
         calendarController: calendarController,
         viewConfiguration: viewConfiguration,
-        components: CalendarComponents(
-          multiDayComponents: MultiDayComponents(
-            headerComponents: MultiDayHeaderComponents(
-              weekNumberBuilder: (date, _) => SizedBox(),
-              dayHeaderBuilder: (date, _) => Padding(
-                padding: const EdgeInsets.only(bottom: 8.0),
-                child: Text(_weekNames[date.weekday - 1]),
-              ),
-            ),
-          ),
-        ),
+        components: calendarComponents,
         callbacks: CalendarCallbacks(
           onEventTapped: (event, _) {
             final lecture = event.data;

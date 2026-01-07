@@ -7,6 +7,7 @@ import 'package:urnicar/data/remote_timetable/timetable_scraper.dart';
 import 'package:urnicar/data/timetable/optimiser.dart';
 import 'package:urnicar/data/timetable/timetable_record.dart';
 import 'package:urnicar/data/timetable/timetables_provider.dart';
+import 'package:urnicar/ui/widgets/calendar_components.dart';
 import 'package:urnicar/ui/widgets/lecture_tile.dart';
 
 class EditScreen extends ConsumerStatefulWidget {
@@ -102,10 +103,23 @@ class EditScreenState extends ConsumerState<EditScreen> {
         eventsController: eventsController,
         calendarController: calendarController,
         viewConfiguration: viewConfiguration,
+        components: calendarComponents,
         callbacks: CalendarCallbacks(
-          onEventTapped: (event, _) => calendarController.selectEvent(event),
-          onEventCreate: (event) => event,
-          onEventCreated: (event) => eventsController.addEvent(event),
+          onEventTapped: (event, _) {
+            showModalBottomSheet(
+              context: context,
+              builder: (context) => Container(
+                width: double.infinity,
+                color: Theme.of(context).primaryColor,
+                child: SafeArea(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [Text(event.data?.subject.name ?? '')],
+                  ),
+                ),
+              ),
+            );
+          },
         ),
         header: const CalendarHeader<Lecture>(
           multiDayHeaderConfiguration: MultiDayHeaderConfiguration(

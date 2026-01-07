@@ -1,6 +1,9 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:pocketbase/pocketbase.dart';
 import 'package:urnicar/data/sync/pocketbase.dart';
 import 'package:urnicar/data/timetable/timetables_provider.dart';
 
@@ -22,10 +25,23 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     super.dispose();
   }
 
-  void _handleLogin() async {
-    await pb
-        .collection('users')
-        .authWithPassword(emailController.text, passwordController.text);
+  void handleLogin() async {
+    try {
+      await pb
+          .collection('users')
+          .authWithPassword(emailController.text, passwordController.text);
+    } on ClientException catch (e) {
+      switch (e.statusCode) {
+        case HttpStatus.badRequest:
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Napačna e-pošta ali geslo')),
+            );
+          }
+          break;
+      }
+      return;
+    }
 
     await ref.read(timetablesProvider.notifier).syncTimetables();
 
@@ -58,15 +74,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: _handleLogin,
+                onPressed: handleLogin,
                 child: const Text('Vpis'),
               ),
             ),
             const SizedBox(height: 12.0),
             TextButton(
-              onPressed: () {
-                context.push('/register');
-              },
+              onPressed: () => context.pushReplacement('/register'),
               child: const Text('Nimaš računa? Registriraj se'),
             ),
           ],

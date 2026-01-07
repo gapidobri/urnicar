@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:hive_ce/hive.dart';
 import 'package:hive_ce_flutter/adapters.dart';
 import 'package:urnicar/data/sync/pocketbase.dart';
 import 'package:urnicar/data/timetable/timetable_record.dart';
+import 'package:urnicar/data/timetable/timetables_provider.dart';
 import 'package:urnicar/hive/boxes.dart';
 import 'package:urnicar/hive/hive_registrar.g.dart';
 import 'package:urnicar/ui/calendar_screen.dart';
@@ -24,8 +24,20 @@ void main() async {
   runApp(const ProviderScope(child: App()));
 }
 
-class App extends StatelessWidget {
+class App extends ConsumerStatefulWidget {
   const App({super.key});
+
+  @override
+  ConsumerState<App> createState() => _AppState();
+}
+
+class _AppState extends ConsumerState<App> {
+  @override
+  void initState() {
+    ref.read(timetablesProvider.notifier).syncTimetables();
+
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
