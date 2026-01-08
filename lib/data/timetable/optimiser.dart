@@ -76,7 +76,9 @@ class TimetableOptimiser {
         testTimetable[lecture.day.value].add(lecture);
       }
 
-      final (overlap, gap) = _getOverlapAndGap(testTimetable);
+      final gap = _getGap(testTimetable);
+      final overlap = _getOverlap(testTimetable);
+
       if (overlap < bestOverlap) {
         bestOverlap = overlap;
         bestGap = gap;
@@ -140,6 +142,45 @@ class TimetableOptimiser {
     return overlap;
   }
 
+  static int _getGap(List<List<Lecture>> timetable) {
+    int gap = 0;
+    bool addAB = true;
+
+    for (final dayTimetable in timetable) {
+      final intervals = HashSet<(int, int)>();
+      for (final lecture in dayTimetable) {
+        int a = lecture.time.start;
+        int b = lecture.time.end;
+        for (final (c, d) in HashSet<(int, int)>.from(intervals)) {
+          if (d < a || b < c) {
+            continue;
+          }
+          if (c <= a && b <= d) {
+            addAB = false;
+            break;
+          }
+
+          intervals.remove((c, d));
+          a = min(a, c);
+          b = max(b, d);
+        }
+
+        if (addAB) {
+          intervals.add((a, b));
+        }
+      }
+
+      final sorted = intervals.toList();
+      sorted.sort((a, b) => a.$1.compareTo(b.$1));
+      for (int i = 0; i < sorted.length - 1; i++) {
+        gap += sorted[i + 1].$1 - sorted[i].$2;
+      }
+    }
+    return gap;
+  }
+
+  // NOTE: This function currently doesn't calculate overlap correctly so it should not be used
+  // it only stays here until I get an idea how to fix it without essentially having _getOverlap code inside (or give up trying)
   static (int, int) _getOverlapAndGap(List<List<Lecture>> timetable) {
     int overlap = 0;
     int gap = 0;
