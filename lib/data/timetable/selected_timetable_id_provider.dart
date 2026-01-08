@@ -1,17 +1,18 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:urnicar/data/secure_storage.dart';
-import 'package:urnicar/data/timetable/timetable_record.dart';
 import 'package:urnicar/data/timetable/timetables_provider.dart';
 
-part 'selected_timetable_provider.g.dart';
+part 'selected_timetable_id_provider.g.dart';
 
 @riverpod
-class SelectedTimetable extends _$SelectedTimetable {
+class SelectedTimetableId extends _$SelectedTimetableId {
   @override
-  TimetableRecord? build() {
-    secureStorage
-        .read(key: 'selected_timetable')
-        .then((id) => state = ref.read(timetablesProvider)[id]);
+  String? build() {
+    secureStorage.read(key: 'selected_timetable').then((id) {
+      if (ref.read(timetablesProvider).containsKey(id)) {
+        state = id;
+      }
+    });
     return null;
   }
 
@@ -21,6 +22,6 @@ class SelectedTimetable extends _$SelectedTimetable {
       id = timetables.values.first.id;
     }
     await secureStorage.write(key: 'selected_timetable', value: id);
-    state = timetables[id];
+    state = id;
   }
 }

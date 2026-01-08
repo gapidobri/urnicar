@@ -41,7 +41,7 @@ final class TimetablesProvider
   }
 }
 
-String _$timetablesHash() => r'501a5727b39b22b00c3729593256bfdc81aa2e14';
+String _$timetablesHash() => r'44dd49615c7d4a1f7c9c6d2f493232649ac31df0';
 
 abstract class _$Timetables extends $Notifier<Map<String, TimetableRecord>> {
   Map<String, TimetableRecord> build();

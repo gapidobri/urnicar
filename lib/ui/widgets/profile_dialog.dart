@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:urnicar/data/sync/pocketbase.dart';
 import 'package:urnicar/data/sync/user_record.dart';
+import 'package:urnicar/data/timetable/selected_timetable_id_provider.dart';
 import 'package:urnicar/data/timetable/timetables_provider.dart';
 
 class ProfileDialog extends ConsumerWidget {
@@ -34,6 +35,7 @@ class ProfileDialog extends ConsumerWidget {
               onPressed: () async {
                 context.pop();
                 await ref.read(timetablesProvider.notifier).clearLocal();
+                await ref.read(selectedTimetableIdProvider.notifier).set(null);
                 pb.authStore.clear();
               },
               child: Text('Odjava'),
