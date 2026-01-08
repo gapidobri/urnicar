@@ -12,7 +12,6 @@ import 'package:urnicar/ui/widgets/lecture_tile.dart';
 
 class EditScreen extends ConsumerStatefulWidget {
   const EditScreen({super.key, required this.timetableId});
-
   final String timetableId;
 
   @override
@@ -26,11 +25,15 @@ class EditScreenState extends ConsumerState<EditScreen> {
   late TimetableRecord timetable;
   late final ViewConfiguration viewConfiguration;
 
+  late final TextEditingController nameController;
+
   @override
   void initState() {
     super.initState();
 
     timetable = ref.read(timetablesProvider)[widget.timetableId]!;
+
+    nameController = TextEditingController(text: timetable.name);
 
     final displayRange = DateTime.now().weekRange();
     final timeOfDayRange = TimeOfDayRange(
@@ -69,7 +72,7 @@ class EditScreenState extends ConsumerState<EditScreen> {
     final lectures = <Lecture>[];
     await Future.wait(
       timetable.subjects.map(
-        (s) => ref.read(
+            (s) => ref.read(
           remoteLecturesProvider
               .call(timetable.sourceTimetableId, FilterType.subject, s.id)
               .future,
@@ -84,6 +87,7 @@ class EditScreenState extends ConsumerState<EditScreen> {
   }
 
   void saveAndExit() async {
+    timetable = timetable.copyWith(name: nameController.text);
     await ref.read(timetablesProvider.notifier).updateTimetable(timetable);
     if (mounted) {
       context.pop();
@@ -94,7 +98,18 @@ class EditScreenState extends ConsumerState<EditScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Urejanje urnika'),
+        title: TextField(
+          controller: nameController,
+          decoration: const InputDecoration(
+            isDense: true,
+            contentPadding: EdgeInsets.zero,
+            border: UnderlineInputBorder(),
+          ),
+          style: const TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
         actions: [
           IconButton(icon: const Icon(Icons.check), onPressed: saveAndExit),
         ],
