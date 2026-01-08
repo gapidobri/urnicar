@@ -264,7 +264,32 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
             Expanded(
               flex: 8,
               child: DropdownButton<String>(
-                value: ref.watch(selectedTimetableIdProvider),
+
+                // to prevent crash on last delete
+                value: () {
+                  final timetables = ref.watch(timetablesProvider).values.toList();
+                  final selectedId = ref.watch(selectedTimetableIdProvider);
+
+                  // if valid, return selected
+                  if (selectedId != null &&
+                      timetables.any((t) => t.id == selectedId)) {
+                    return selectedId;
+                  }
+
+                  // If invalid, return next
+                  if (timetables.isNotEmpty) {
+                    final nextId = timetables.first.id;
+                    WidgetsBinding.instance.addPostFrameCallback((_) {
+                      ref.read(selectedTimetableIdProvider.notifier).set(nextId);
+                    });
+
+                    return nextId;
+                  }
+
+                  // If no left, return null
+                  return null;
+                }(),
+
                 hint: const Text("Izberi urnik"),
                 items: [
                   for (final timetable in ref.watch(timetablesProvider).values)
@@ -307,10 +332,30 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                       break;
                     case 'delete':
                       if (selectedTimetableId != null) {
-                        ref
-                            .read(timetablesProvider.notifier)
-                            .deleteTimetable(selectedTimetableId);
-                        eventsController.clearEvents();
+                        showDialog<bool>(
+                          context: context,
+                          builder: (context) => AlertDialog(
+                            title: const Text('Odstranitev urnika'),
+                            content: const Text('Ali si prepričen, da želiš odstraniti urnik?'),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.pop(context, false),
+                                child: const Text('Ne'),
+                              ),
+                              TextButton(
+                                onPressed: () => Navigator.pop(context, true),
+                                child: const Text('Da'),
+                              ),
+                            ],
+                          ),
+                        ).then((deleteBool) {
+                          if (deleteBool == true) {
+                            ref
+                                .read(timetablesProvider.notifier)
+                                .deleteTimetable(selectedTimetableId);
+                            eventsController.clearEvents();
+                          }
+                        });
                       }
                       break;
                   }
