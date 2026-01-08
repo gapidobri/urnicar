@@ -118,6 +118,23 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
     ref.listen(selectedTimetableIdProvider, (prev, curr) => loadLectures());
 
     return Scaffold(
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          setState(() {
+            if (viewConfiguration == viewConfigurations[0]) {
+              viewConfiguration = viewConfigurations[1];
+            } else {
+              viewConfiguration = viewConfigurations[0];
+            }
+          });
+        },
+        child: Icon(
+          viewConfiguration == viewConfigurations[0]
+              ? Icons.calendar_view_week
+              : Icons.calendar_view_day,
+        ),
+      ),
+
       body: CalendarView<Lecture>(
         eventsController: eventsController,
         calendarController: calendarController,
@@ -203,7 +220,6 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
         header: Column(
           children: [
             topToolbar(),
-            calendarToolbar(),
             const CalendarHeader<Lecture>(
               multiDayHeaderConfiguration: MultiDayHeaderConfiguration(
                 showTiles: false,
@@ -219,27 +235,6 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                 LectureTile(lecture: event.data!),
           ),
         ),
-      ),
-    );
-  }
-
-  Widget calendarToolbar() {
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: Row(
-        children: [
-          Expanded(
-            child: DropdownButton<ViewConfiguration>(
-              value: viewConfiguration,
-              items: viewConfigurations
-                  .map((v) => DropdownMenuItem(value: v, child: Text(v.name)))
-                  .toList(),
-              onChanged: (v) {
-                if (v != null) setState(() => viewConfiguration = v);
-              },
-            ),
-          ),
-        ],
       ),
     );
   }
