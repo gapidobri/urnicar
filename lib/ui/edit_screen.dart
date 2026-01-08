@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -8,6 +9,7 @@ import 'package:urnicar/data/timetable/optimiser.dart';
 import 'package:urnicar/data/timetable/timetable_record.dart';
 import 'package:urnicar/data/timetable/timetables_provider.dart';
 import 'package:urnicar/ui/widgets/calendar_components.dart';
+import 'package:urnicar/ui/widgets/edit_lecture_bottom_sheet.dart';
 import 'package:urnicar/ui/widgets/lecture_tile.dart';
 
 class EditScreen extends ConsumerStatefulWidget {
@@ -69,6 +71,16 @@ class EditScreenState extends ConsumerState<EditScreen> {
   }
 
   void optimise() async {
+    final ignoredLectures = timetable.lectures.where((l) => l.ignored);
+    final ignoredSubjectMap = <String, Set<LectureType>>{};
+    for (final ignoredLecture in ignoredLectures) {
+      final subjectId = ignoredLecture.subject.id;
+      if (!ignoredSubjectMap.containsKey(subjectId)) {
+        ignoredSubjectMap[subjectId] = {};
+      }
+      ignoredSubjectMap[subjectId]?.add(ignoredLecture.type);
+    }
+
     final lectures = <Lecture>[];
     await Future.wait(
       timetable.subjects.map(
@@ -80,9 +92,19 @@ class EditScreenState extends ConsumerState<EditScreen> {
       ),
     ).then((t) => t.forEach(lectures.addAll));
 
-    final result = TimetableOptimiser.minimiseOverlapAndGap(lectures);
+    final filteredLectures = lectures
+        .whereNot(
+          (l) => ignoredSubjectMap[l.subject.id]?.contains(l.type) ?? false,
+        )
+        .toList();
 
-    timetable = timetable.copyWith(lectures: result[0]);
+    final result = TimetableOptimiser.minimiseOverlapAndGap(filteredLectures);
+
+    final selectedResult = result[0];
+
+    selectedResult.addAll(ignoredLectures);
+
+    timetable = timetable.copyWith(lectures: selectedResult);
     loadLectures();
   }
 
@@ -123,15 +145,16 @@ class EditScreenState extends ConsumerState<EditScreen> {
           onEventTapped: (event, _) {
             showModalBottomSheet(
               context: context,
-              builder: (context) => Container(
-                width: double.infinity,
-                color: Theme.of(context).primaryColor,
-                child: SafeArea(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [Text(event.data?.subject.name ?? '')],
-                  ),
-                ),
+              builder: (context) => EditLectureBottomSheet(
+                lecture: event.data!,
+                onUpdate: (lecture) {
+                  timetable = timetable.copyWith(
+                    lectures: timetable.lectures
+                        .map((l) => l.id == lecture.id ? lecture : l)
+                        .toList(),
+                  );
+                  loadLectures();
+                },
               ),
             );
           },
@@ -145,7 +168,8 @@ class EditScreenState extends ConsumerState<EditScreen> {
           calendarController: calendarController,
           eventsController: eventsController,
           multiDayTileComponents: TileComponents(
-            tileBuilder: (event, tileRange) => LectureTile(event: event),
+            tileBuilder: (event, tileRange) =>
+                LectureTile(lecture: event.data!, showPin: true),
           ),
         ),
       ),

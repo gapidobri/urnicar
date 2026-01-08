@@ -60,6 +60,8 @@ Lecture _$LectureFromJson(Map json) => Lecture(
   ),
   subject: Subject.fromJson(Map<String, dynamic>.from(json['subject'] as Map)),
   type: $enumDecode(_$LectureTypeEnumMap, json['type']),
+  ignored: json['ignored'] as bool? ?? false,
+  pinned: json['pinned'] as bool? ?? false,
 );
 
 Map<String, dynamic> _$LectureToJson(Lecture instance) => <String, dynamic>{
@@ -70,6 +72,8 @@ Map<String, dynamic> _$LectureToJson(Lecture instance) => <String, dynamic>{
   'classroom': instance.classroom.toJson(),
   'subject': instance.subject.toJson(),
   'type': _$LectureTypeEnumMap[instance.type]!,
+  'ignored': instance.ignored,
+  'pinned': instance.pinned,
 };
 
 const _$DayOfWeekEnumMap = {

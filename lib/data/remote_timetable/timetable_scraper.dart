@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:equatable/equatable.dart';
 import 'package:html/parser.dart' as parser;
 import 'package:http/http.dart' as http;
@@ -329,6 +331,8 @@ class Lecture extends Equatable {
   final Classroom classroom;
   final Subject subject;
   final LectureType type;
+  final bool ignored;
+  final bool pinned;
 
   const Lecture({
     required this.id,
@@ -338,6 +342,8 @@ class Lecture extends Equatable {
     required this.classroom,
     required this.subject,
     required this.type,
+    this.ignored = false,
+    this.pinned = false,
   });
 
   Lecture copyWith({
@@ -348,6 +354,8 @@ class Lecture extends Equatable {
     Classroom? classroom,
     Subject? subject,
     LectureType? type,
+    bool? ignored,
+    bool? pinned,
   }) => Lecture(
     id: id ?? this.id,
     day: day ?? this.day,
@@ -356,10 +364,22 @@ class Lecture extends Equatable {
     classroom: classroom ?? this.classroom,
     subject: subject ?? this.subject,
     type: type ?? this.type,
+    ignored: ignored ?? this.ignored,
+    pinned: pinned ?? this.pinned,
   );
 
   @override
-  List<Object> get props => [id, day, time, teachers, classroom, subject, type];
+  List<Object> get props => [
+    id,
+    day,
+    time,
+    teachers,
+    classroom,
+    subject,
+    type,
+    ignored,
+    pinned,
+  ];
 
   factory Lecture.fromJson(Map<String, dynamic> json) =>
       _$LectureFromJson(json);

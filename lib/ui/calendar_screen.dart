@@ -55,17 +55,20 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
     if (selectedTimetable == null) return;
 
     final startOfWeek = DateTime.now().startOfWeek();
-    final events = selectedTimetable.lectures.map((lecture) {
-      final day = startOfWeek.addDays(lecture.day.value);
-      return CalendarEvent<Lecture>(
-        canModify: false,
-        dateTimeRange: DateTimeRange(
-          start: day.add(Duration(hours: lecture.time.start)),
-          end: day.add(Duration(hours: lecture.time.end)),
-        ),
-        data: lecture,
-      );
-    }).toList();
+    final events = selectedTimetable.lectures
+        .where((lecture) => !lecture.ignored)
+        .map((lecture) {
+          final day = startOfWeek.addDays(lecture.day.value);
+          return CalendarEvent<Lecture>(
+            canModify: false,
+            dateTimeRange: DateTimeRange(
+              start: day.add(Duration(hours: lecture.time.start)),
+              end: day.add(Duration(hours: lecture.time.end)),
+            ),
+            data: lecture,
+          );
+        })
+        .toList();
 
     eventsController.clearEvents();
     eventsController.addEvents(events);
@@ -212,7 +215,8 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
           calendarController: calendarController,
           eventsController: eventsController,
           multiDayTileComponents: TileComponents(
-            tileBuilder: (event, tileRange) => LectureTile(event: event),
+            tileBuilder: (event, tileRange) =>
+                LectureTile(lecture: event.data!),
           ),
         ),
       ),

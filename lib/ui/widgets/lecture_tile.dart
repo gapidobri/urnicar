@@ -1,26 +1,26 @@
 import 'package:flutter/material.dart';
-import 'package:kalender/kalender.dart';
 import 'package:urnicar/data/remote_timetable/timetable_scraper.dart';
 
 class LectureTile extends StatelessWidget {
-  const LectureTile({super.key, required this.event});
+  const LectureTile({super.key, required this.lecture, this.showPin = false});
 
-  final CalendarEvent<Lecture> event;
+  final Lecture lecture;
+  final bool showPin;
 
   @override
   Widget build(BuildContext context) {
-    final lecture = event.data!;
-
     return Container(
       margin: const EdgeInsets.all(2),
       padding: const EdgeInsets.all(4),
       decoration: BoxDecoration(
-        color: HSLColor.fromAHSL(
-          1,
-          lecture.subject.acronym.hashCode % 360,
-          0.5,
-          0.5,
-        ).toColor(),
+        color: lecture.ignored
+            ? Colors.grey
+            : HSLColor.fromAHSL(
+                1,
+                lecture.subject.acronym.hashCode % 360,
+                0.5,
+                0.5,
+              ).toColor(),
         borderRadius: BorderRadius.circular(6.0),
       ),
       child: Column(
@@ -39,6 +39,13 @@ class LectureTile extends StatelessWidget {
             lecture.classroom.name,
             maxLines: 1,
             style: const TextStyle(color: Colors.white, fontSize: 12),
+          ),
+          const Spacer(),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              if (lecture.pinned && showPin) Icon(Icons.push_pin, size: 14.0),
+            ],
           ),
         ],
       ),

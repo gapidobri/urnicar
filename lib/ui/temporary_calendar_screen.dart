@@ -118,19 +118,18 @@ class _TemporaryCalendarScreenState
               onEventTapped: (event, _) {
                 final lecture = event.data;
                 if (lecture == null) return;
-                print(lecture.type.toString());
-                String lectureType = lecture.type.name.toString() == "lecture"
+                final lectureType = lecture.type == LectureType.lecture
                     ? "Predavanje"
                     : "Vaje";
-                List<String> days = [
+                final days = [
                   "Ponedeljek",
                   "Torek",
                   "Sreda",
                   "Četrtek",
                   "Petek",
                 ];
-                String lectureDay = days[lecture.day.index];
-                String timestr =
+                final lectureDay = days[lecture.day.index];
+                final timeString =
                     "$lectureDay ${lecture.time.start.toString().padLeft(2, '0')}:00 - ${lecture.time.end.toString().padLeft(2, '0')}:00";
 
                 showDialog(
@@ -155,7 +154,7 @@ class _TemporaryCalendarScreenState
                       mainAxisSize: MainAxisSize.min,
 
                       children: [
-                        Text(timestr),
+                        Text(timeString),
                         InkWell(
                           child: Text(lecture.classroom.name),
                           onTap: () {
@@ -202,7 +201,8 @@ class _TemporaryCalendarScreenState
               calendarController: calendarController,
               eventsController: eventsController,
               multiDayTileComponents: TileComponents(
-                tileBuilder: (event, range) => LectureTile(event: event),
+                tileBuilder: (event, range) =>
+                    LectureTile(lecture: event.data!),
               ),
             ),
           );
