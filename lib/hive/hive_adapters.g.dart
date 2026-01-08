@@ -24,7 +24,7 @@ class LectureAdapter extends TypeAdapter<Lecture> {
       classroom: fields[4] as Classroom,
       subject: fields[5] as Subject,
       type: fields[6] as LectureType,
-      ignored: fields[9] == null ? false : fields[9] as bool,
+      hidden: fields[10] == null ? false : fields[10] as bool,
       pinned: fields[8] == null ? false : fields[8] as bool,
     );
   }
@@ -49,8 +49,8 @@ class LectureAdapter extends TypeAdapter<Lecture> {
       ..write(obj.type)
       ..writeByte(8)
       ..write(obj.pinned)
-      ..writeByte(9)
-      ..write(obj.ignored);
+      ..writeByte(10)
+      ..write(obj.hidden);
   }
 
   @override

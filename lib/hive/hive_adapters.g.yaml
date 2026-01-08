@@ -5,7 +5,7 @@ nextTypeId: 11
 types:
   Lecture:
     typeId: 1
-    nextIndex: 10
+    nextIndex: 11
     fields:
       id:
         index: 0
@@ -23,8 +23,8 @@ types:
         index: 6
       pinned:
         index: 8
-      ignored:
-        index: 9
+      hidden:
+        index: 10
   TimetableRecord:
     typeId: 2
     nextIndex: 9

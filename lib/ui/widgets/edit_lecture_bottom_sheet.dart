@@ -25,14 +25,18 @@ class EditLectureBottomSheet extends ConsumerStatefulWidget {
 
 class _EditLectureBottomSheetState
     extends ConsumerState<EditLectureBottomSheet> {
-  late bool ignored;
+  late bool hidden;
   late bool pinned;
 
   @override
   void initState() {
-    ignored = widget.lecture.ignored;
+    hidden = widget.lecture.hidden;
     pinned = widget.lecture.pinned;
     super.initState();
+  }
+
+  void updateLecture() {
+    widget.onUpdate(widget.lecture.copyWith(hidden: hidden, pinned: pinned));
   }
 
   @override
@@ -55,28 +59,36 @@ class _EditLectureBottomSheetState
                 _lectureTypes[widget.lecture.type] ?? 'Ostalo',
                 style: Theme.of(context).textTheme.titleSmall,
               ),
-              Row(
+              const SizedBox(height: 16.0),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Checkbox(
-                    value: ignored,
-                    onChanged: (value) {
-                      setState(() => ignored = value ?? false);
-                      widget.onUpdate(widget.lecture.copyWith(ignored: value));
-                    },
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Checkbox(
+                        value: hidden,
+                        onChanged: (value) {
+                          setState(() => hidden = value ?? false);
+                          updateLecture();
+                        },
+                      ),
+                      Text('Skrij uro'),
+                    ],
                   ),
-                  Text('Ignoriraj uro'),
-                ],
-              ),
-              Row(
-                children: [
-                  Checkbox(
-                    value: pinned,
-                    onChanged: (value) {
-                      setState(() => pinned = value ?? false);
-                      widget.onUpdate(widget.lecture.copyWith(pinned: value));
-                    },
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Checkbox(
+                        value: pinned,
+                        onChanged: (value) {
+                          setState(() => pinned = value ?? false);
+                          updateLecture();
+                        },
+                      ),
+                      Text('Pripni uro'),
+                    ],
                   ),
-                  Text('Zamrzni uro'),
                 ],
               ),
             ],

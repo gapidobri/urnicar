@@ -14,6 +14,7 @@ import 'package:urnicar/ui/widgets/lecture_tile.dart';
 
 class EditScreen extends ConsumerStatefulWidget {
   const EditScreen({super.key, required this.timetableId});
+
   final String timetableId;
 
   @override
@@ -71,20 +72,20 @@ class EditScreenState extends ConsumerState<EditScreen> {
   }
 
   void optimise() async {
-    final ignoredLectures = timetable.lectures.where((l) => l.ignored);
-    final ignoredSubjectMap = <String, Set<LectureType>>{};
-    for (final ignoredLecture in ignoredLectures) {
-      final subjectId = ignoredLecture.subject.id;
-      if (!ignoredSubjectMap.containsKey(subjectId)) {
-        ignoredSubjectMap[subjectId] = {};
+    final hiddenLectures = timetable.lectures.where((l) => l.hidden);
+    final hiddenSubjectMap = <String, Set<LectureType>>{};
+    for (final hiddenLecture in hiddenLectures) {
+      final subjectId = hiddenLecture.subject.id;
+      if (!hiddenSubjectMap.containsKey(subjectId)) {
+        hiddenSubjectMap[subjectId] = {};
       }
-      ignoredSubjectMap[subjectId]?.add(ignoredLecture.type);
+      hiddenSubjectMap[subjectId]?.add(hiddenLecture.type);
     }
 
     final lectures = <Lecture>[];
     await Future.wait(
       timetable.subjects.map(
-            (s) => ref.read(
+        (s) => ref.read(
           remoteLecturesProvider
               .call(timetable.sourceTimetableId, FilterType.subject, s.id)
               .future,
@@ -94,7 +95,7 @@ class EditScreenState extends ConsumerState<EditScreen> {
 
     final filteredLectures = lectures
         .whereNot(
-          (l) => ignoredSubjectMap[l.subject.id]?.contains(l.type) ?? false,
+          (l) => hiddenSubjectMap[l.subject.id]?.contains(l.type) ?? false,
         )
         .toList();
 
@@ -102,7 +103,7 @@ class EditScreenState extends ConsumerState<EditScreen> {
 
     final selectedResult = result[0];
 
-    selectedResult.addAll(ignoredLectures);
+    selectedResult.addAll(hiddenLectures);
 
     timetable = timetable.copyWith(lectures: selectedResult);
     loadLectures();
@@ -110,6 +111,7 @@ class EditScreenState extends ConsumerState<EditScreen> {
 
   void saveAndExit() async {
     timetable = timetable.copyWith(name: nameController.text);
+
     await ref.read(timetablesProvider.notifier).updateTimetable(timetable);
     if (mounted) {
       context.pop();
@@ -127,10 +129,7 @@ class EditScreenState extends ConsumerState<EditScreen> {
             contentPadding: EdgeInsets.zero,
             border: UnderlineInputBorder(),
           ),
-          style: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w500,
-          ),
+          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
         ),
         actions: [
           IconButton(icon: const Icon(Icons.check), onPressed: saveAndExit),
@@ -145,6 +144,7 @@ class EditScreenState extends ConsumerState<EditScreen> {
           onEventTapped: (event, _) {
             showModalBottomSheet(
               context: context,
+              barrierColor: Colors.transparent,
               builder: (context) => EditLectureBottomSheet(
                 lecture: event.data!,
                 onUpdate: (lecture) {
