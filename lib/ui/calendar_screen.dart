@@ -4,7 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:kalender/kalender.dart';
 import 'package:urnicar/data/remote_timetable/timetable_scraper.dart';
 import 'package:urnicar/data/sync/pocketbase.dart';
-import 'package:urnicar/data/timetable/selected_timetable_provider.dart';
+import 'package:urnicar/data/timetable/selected_timetable_id_provider.dart';
 import 'package:urnicar/data/timetable/timetables_provider.dart';
 import 'package:urnicar/ui/temporary_calendar_screen.dart';
 import 'package:urnicar/ui/widgets/calendar_components.dart';
@@ -48,11 +48,14 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
   }
 
   void loadLectures() {
-    final timetable = ref.read(selectedTimetableProvider);
-    if (timetable == null) return;
+    final selectedTimetableId = ref.read(selectedTimetableIdProvider);
+    if (selectedTimetableId == null) return;
+
+    final selectedTimetable = ref.read(timetablesProvider)[selectedTimetableId];
+    if (selectedTimetable == null) return;
 
     final startOfWeek = DateTime.now().startOfWeek();
-    final events = timetable.lectures.map((lecture) {
+    final events = selectedTimetable.lectures.map((lecture) {
       final day = startOfWeek.addDays(lecture.day.value);
       return CalendarEvent<Lecture>(
         canModify: false,
@@ -69,7 +72,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
   }
 
   void handleTimetableChange(String? value) {
-    ref.read(selectedTimetableProvider.notifier).set(value);
+    ref.read(selectedTimetableIdProvider.notifier).set(value);
 
     if (value == null) {
       eventsController.clearEvents();
@@ -108,11 +111,8 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
 
   @override
   Widget build(BuildContext context) {
-    ref.listen(selectedTimetableProvider, (prev, curr) {
-      if (prev?.id != curr?.id) {
-        loadLectures();
-      }
-    });
+    ref.listen(timetablesProvider, (prev, curr) => loadLectures());
+    ref.listen(selectedTimetableIdProvider, (prev, curr) => loadLectures());
 
     return Scaffold(
       body: CalendarView<Lecture>(
@@ -143,9 +143,9 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                     openTemporaryCalendar(
                       context: context,
                       ref: ref,
-                      selectedTimetableId: ref
-                          .read(selectedTimetableProvider)!
-                          .id,
+                      selectedTimetableId: ref.read(
+                        selectedTimetableIdProvider,
+                      )!,
                       filterType: FilterType.subject,
                       filterId: lecture.subject.id,
                       title: lecture.subject.name,
@@ -164,9 +164,9 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                         openTemporaryCalendar(
                           context: context,
                           ref: ref,
-                          selectedTimetableId: ref
-                              .read(selectedTimetableProvider)!
-                              .id,
+                          selectedTimetableId: ref.read(
+                            selectedTimetableIdProvider,
+                          )!,
                           filterType: FilterType.classroom,
                           filterId: lecture.classroom.id,
                           title: lecture.classroom.name,
@@ -182,9 +182,9 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                           openTemporaryCalendar(
                             context: context,
                             ref: ref,
-                            selectedTimetableId: ref
-                                .read(selectedTimetableProvider)!
-                                .id,
+                            selectedTimetableId: ref.read(
+                              selectedTimetableIdProvider,
+                            )!,
                             filterType: FilterType.teacher,
                             filterId: teacher.id,
                             title: teacher.name,
@@ -264,7 +264,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
             Expanded(
               flex: 8,
               child: DropdownButton<String>(
-                value: ref.watch(selectedTimetableProvider)?.id,
+                value: ref.watch(selectedTimetableIdProvider),
                 hint: const Text("Izberi urnik"),
                 items: [
                   for (final timetable in ref.watch(timetablesProvider).values)
@@ -296,18 +296,20 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
               child: PopupMenuButton<String>(
                 icon: const Icon(Icons.menu),
                 onSelected: (value) {
-                  final selectedTimetable = ref.read(selectedTimetableProvider);
+                  final selectedTimetableId = ref.read(
+                    selectedTimetableIdProvider,
+                  );
                   switch (value) {
                     case 'edit':
-                      if (selectedTimetable != null) {
-                        context.push('/edit/${selectedTimetable.id}');
+                      if (selectedTimetableId != null) {
+                        context.push('/edit/$selectedTimetableId');
                       }
                       break;
                     case 'delete':
-                      if (selectedTimetable != null) {
+                      if (selectedTimetableId != null) {
                         ref
                             .read(timetablesProvider.notifier)
-                            .deleteTimetable(selectedTimetable.id);
+                            .deleteTimetable(selectedTimetableId);
                         eventsController.clearEvents();
                       }
                       break;

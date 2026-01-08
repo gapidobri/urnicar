@@ -38,7 +38,11 @@ class _ImportScreenState extends ConsumerState<ImportScreen> {
   void handleImportTimetable() async {
     if (timetableId == null || studentId == null) return;
 
-    final existingTimetable = ref.read(timetablesProvider)[timetableId];
+    final existingTimetable = ref
+        .read(timetablesProvider)
+        .values
+        .firstWhereOrNull((t) => t.sourceTimetableId == timetableId);
+
     if (existingTimetable != null) {
       final doContinue = await showDialog<bool>(
         context: context,

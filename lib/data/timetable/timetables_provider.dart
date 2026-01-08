@@ -2,7 +2,7 @@ import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:urnicar/data/sync/pocketbase.dart';
-import 'package:urnicar/data/timetable/selected_timetable_provider.dart';
+import 'package:urnicar/data/timetable/selected_timetable_id_provider.dart';
 import 'package:urnicar/data/timetable/timetable_record.dart';
 import 'package:urnicar/hive/boxes.dart';
 
@@ -26,7 +26,7 @@ class Timetables extends _$Timetables {
 
     await timetablesBox.put(timetable.id, timetable);
     _updateState();
-    ref.read(selectedTimetableProvider.notifier).set(timetable.id);
+    ref.read(selectedTimetableIdProvider.notifier).set(timetable.id);
 
     if (pb.authStore.isValid) {
       await pb
@@ -104,7 +104,7 @@ class Timetables extends _$Timetables {
   }
 
   void deleteTimetable(String id) async {
-    await ref.read(selectedTimetableProvider.notifier).set(null);
+    await ref.read(selectedTimetableIdProvider.notifier).set(null);
     await timetablesBox.delete(id);
     _updateState();
 
