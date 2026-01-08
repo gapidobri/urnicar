@@ -331,7 +331,7 @@ class Lecture extends Equatable {
   final Classroom classroom;
   final Subject subject;
   final LectureType type;
-  final bool ignored;
+  final bool hidden;
   final bool pinned;
 
   const Lecture({
@@ -342,7 +342,7 @@ class Lecture extends Equatable {
     required this.classroom,
     required this.subject,
     required this.type,
-    this.ignored = false,
+    this.hidden = false,
     this.pinned = false,
   });
 
@@ -354,7 +354,7 @@ class Lecture extends Equatable {
     Classroom? classroom,
     Subject? subject,
     LectureType? type,
-    bool? ignored,
+    bool? hidden,
     bool? pinned,
   }) => Lecture(
     id: id ?? this.id,
@@ -364,7 +364,7 @@ class Lecture extends Equatable {
     classroom: classroom ?? this.classroom,
     subject: subject ?? this.subject,
     type: type ?? this.type,
-    ignored: ignored ?? this.ignored,
+    hidden: hidden ?? this.hidden,
     pinned: pinned ?? this.pinned,
   );
 
@@ -377,7 +377,7 @@ class Lecture extends Equatable {
     classroom,
     subject,
     type,
-    ignored,
+    hidden,
     pinned,
   ];
 

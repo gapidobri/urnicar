@@ -56,7 +56,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
 
     final startOfWeek = DateTime.now().startOfWeek();
     final events = selectedTimetable.lectures
-        .where((lecture) => !lecture.ignored)
+        .where((lecture) => !lecture.hidden)
         .map((lecture) {
           final day = startOfWeek.addDays(lecture.day.value);
           return CalendarEvent<Lecture>(
@@ -231,8 +231,10 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
           calendarController: calendarController,
           eventsController: eventsController,
           multiDayTileComponents: TileComponents(
-            tileBuilder: (event, tileRange) =>
-                LectureTile(lecture: event.data!),
+            tileBuilder: (event, tileRange) => LectureTile(
+              lecture: event.data!,
+              longNames: viewConfiguration.name == 'Day',
+            ),
           ),
         ),
       ),
@@ -263,10 +265,12 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
             Expanded(
               flex: 8,
               child: DropdownButton<String>(
-
                 // to prevent crash on last delete
                 value: () {
-                  final timetables = ref.watch(timetablesProvider).values.toList();
+                  final timetables = ref
+                      .watch(timetablesProvider)
+                      .values
+                      .toList();
                   final selectedId = ref.watch(selectedTimetableIdProvider);
 
                   // if valid, return selected
@@ -279,7 +283,9 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                   if (timetables.isNotEmpty) {
                     final nextId = timetables.first.id;
                     WidgetsBinding.instance.addPostFrameCallback((_) {
-                      ref.read(selectedTimetableIdProvider.notifier).set(nextId);
+                      ref
+                          .read(selectedTimetableIdProvider.notifier)
+                          .set(nextId);
                     });
 
                     return nextId;
@@ -335,7 +341,9 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                           context: context,
                           builder: (context) => AlertDialog(
                             title: const Text('Odstranitev urnika'),
-                            content: const Text('Ali si prepričen, da želiš odstraniti urnik?'),
+                            content: const Text(
+                              'Ali si prepričen, da želiš odstraniti urnik?',
+                            ),
                             actions: [
                               TextButton(
                                 onPressed: () => Navigator.pop(context, false),
