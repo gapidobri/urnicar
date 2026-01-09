@@ -167,6 +167,9 @@ class EditScreenState extends ConsumerState<EditScreen> {
         body: CalendarBody<Lecture>(
           calendarController: calendarController,
           eventsController: eventsController,
+          multiDayBodyConfiguration: MultiDayBodyConfiguration(
+            eventLayoutStrategy: sideBySideLayoutStrategy,
+          ),
           multiDayTileComponents: TileComponents(
             tileBuilder: (event, tileRange) =>
                 LectureTile(lecture: event.data!, showPin: true),

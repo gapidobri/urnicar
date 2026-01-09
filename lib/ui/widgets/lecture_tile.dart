@@ -45,7 +45,7 @@ class LectureTile extends StatelessWidget {
             style: const TextStyle(
               color: Colors.white,
               fontWeight: FontWeight.bold,
-              fontSize: 14.0,
+              fontSize: 12.0,
             ),
           ),
           Text(
@@ -53,6 +53,12 @@ class LectureTile extends StatelessWidget {
             maxLines: 1,
             style: const TextStyle(color: Colors.white, fontSize: 12.0),
           ),
+          if (longNames)
+            Text(
+              lecture.teachers.map((t) => t.name).join(', '),
+              maxLines: 1,
+              style: const TextStyle(color: Colors.white, fontSize: 12.0),
+            ),
           const Spacer(),
           Row(
             children: [

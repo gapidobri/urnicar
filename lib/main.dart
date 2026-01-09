@@ -12,6 +12,7 @@ import 'package:urnicar/ui/edit_screen.dart';
 import 'package:urnicar/ui/import_screen.dart';
 import 'package:urnicar/ui/login_screen.dart';
 import 'package:urnicar/ui/register_screen.dart';
+import 'package:urnicar/ui/remote_timetable_screen.dart';
 
 void main() async {
   await Hive.initFlutter();
@@ -59,6 +60,18 @@ final _router = GoRouter(
       path: '/edit/:timetableId',
       builder: (context, state) =>
           EditScreen(timetableId: state.pathParameters['timetableId']!),
+    ),
+    GoRoute(
+      path: '/remoteTimetable/:remoteTimetableId',
+      builder: (context, state) {
+        final params = state.extra as RemoteTimetableScreenParams;
+        return RemoteTimetableScreen(
+          timetableId: state.pathParameters['remoteTimetableId']!,
+          filterType: params.filterType,
+          filterId: params.filterId,
+          title: params.title,
+        );
+      },
     ),
   ],
 );

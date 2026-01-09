@@ -60,8 +60,8 @@ class _EditLectureBottomSheetState
                 style: Theme.of(context).textTheme.titleSmall,
               ),
               const SizedBox(height: 16.0),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Row(
                     mainAxisSize: MainAxisSize.min,
@@ -91,6 +91,21 @@ class _EditLectureBottomSheetState
                   ),
                 ],
               ),
+              if (widget.lecture.type == LectureType.labExercises ||
+                  widget.lecture.type == LectureType.auditoryExercises)
+                ElevatedButton(
+                  onPressed: () {},
+                  style: ButtonStyle(
+                    padding: WidgetStatePropertyAll(
+                      EdgeInsets.symmetric(horizontal: 10.0),
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    spacing: 8.0,
+                    children: [Icon(Icons.sync), Text('Zamenjaj termin')],
+                  ),
+                ),
             ],
           ),
         ),

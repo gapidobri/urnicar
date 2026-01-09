@@ -6,10 +6,19 @@ import 'package:urnicar/data/remote_timetable/timetable_scraper.dart';
 import 'package:urnicar/data/sync/pocketbase.dart';
 import 'package:urnicar/data/timetable/selected_timetable_id_provider.dart';
 import 'package:urnicar/data/timetable/timetables_provider.dart';
-import 'package:urnicar/ui/temporary_calendar_screen.dart';
+import 'package:urnicar/ui/remote_timetable_screen.dart';
 import 'package:urnicar/ui/widgets/calendar_components.dart';
+import 'package:urnicar/ui/widgets/lecture_info_dialog.dart';
 import 'package:urnicar/ui/widgets/lecture_tile.dart';
 import 'package:urnicar/ui/widgets/profile_dialog.dart';
+
+const _days = ["Ponedeljek", "Torek", "Sreda", "Četrtek", "Petek"];
+
+const _lectureTypes = {
+  LectureType.lecture: 'Predavanje',
+  LectureType.labExercises: 'Laboratorijske vaje',
+  LectureType.auditoryExercises: 'Avditorne vaje',
+};
 
 class CalendarScreen extends ConsumerStatefulWidget {
   const CalendarScreen({super.key});
@@ -102,7 +111,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) => TemporaryCalendarScreen(
+        builder: (_) => RemoteTimetableScreen(
           timetableId: timetable.sourceTimetableId,
           filterType: filterType,
           filterId: filterId,
@@ -145,75 +154,9 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
             final lecture = event.data;
             if (lecture == null) return;
 
-            final lectureType = lecture.type.name.toString() == "lecture"
-                ? "Predavanje"
-                : "Vaje";
-            final days = ["Ponedeljek", "Torek", "Sreda", "Četrtek", "Petek"];
-            final lectureDay = days[lecture.day.index];
-            final timeStr =
-                "$lectureDay ${lecture.time.start.toString().padLeft(2, '0')}:00 - ${lecture.time.end.toString().padLeft(2, '0')}:00";
-
             showDialog(
               context: context,
-              builder: (_) => AlertDialog(
-                title: InkWell(
-                  child: Text("${lecture.subject.name} - $lectureType"),
-                  onTap: () {
-                    Navigator.pop(context);
-                    openTemporaryCalendar(
-                      context: context,
-                      ref: ref,
-                      selectedTimetableId: ref.read(
-                        selectedTimetableIdProvider,
-                      )!,
-                      filterType: FilterType.subject,
-                      filterId: lecture.subject.id,
-                      title: lecture.subject.name,
-                    );
-                  },
-                ),
-
-                content: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(timeStr),
-                    InkWell(
-                      child: Text(lecture.classroom.name),
-                      onTap: () {
-                        Navigator.pop(context);
-                        openTemporaryCalendar(
-                          context: context,
-                          ref: ref,
-                          selectedTimetableId: ref.read(
-                            selectedTimetableIdProvider,
-                          )!,
-                          filterType: FilterType.classroom,
-                          filterId: lecture.classroom.id,
-                          title: lecture.classroom.name,
-                        );
-                      },
-                    ),
-
-                    for (final teacher in lecture.teachers)
-                      InkWell(
-                        child: Text(teacher.name),
-                        onTap: () {
-                          Navigator.pop(context);
-                          openTemporaryCalendar(
-                            context: context,
-                            ref: ref,
-                            selectedTimetableId: ref.read(
-                              selectedTimetableIdProvider,
-                            )!,
-                            filterType: FilterType.teacher,
-                            filterId: teacher.id,
-                            title: teacher.name,
-                          );
-                        },
-                      ),
-                  ],
-                ),
-              ),
+              builder: (_) => LectureInfoDialog(lecture: lecture),
             );
           },
         ),
@@ -230,6 +173,9 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
         body: CalendarBody<Lecture>(
           calendarController: calendarController,
           eventsController: eventsController,
+          multiDayBodyConfiguration: MultiDayBodyConfiguration(
+            eventLayoutStrategy: sideBySideLayoutStrategy,
+          ),
           multiDayTileComponents: TileComponents(
             tileBuilder: (event, tileRange) => LectureTile(
               lecture: event.data!,
@@ -342,7 +288,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                           builder: (context) => AlertDialog(
                             title: const Text('Odstranitev urnika'),
                             content: const Text(
-                              'Ali si prepričen, da želiš odstraniti urnik?',
+                              'Ali si prepričan, da želiš odstraniti urnik?',
                             ),
                             actions: [
                               TextButton(
