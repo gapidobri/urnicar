@@ -143,64 +143,63 @@ class _ImportScreenState extends ConsumerState<ImportScreen> {
 
     return Scaffold(
       appBar: AppBar(title: Text('Uvozi urnik')),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            switch (timetables) {
-              AsyncLoading<List<Timetable>>() => LinearProgressIndicator(),
-              AsyncError<List<Timetable>>() => Text(
-                'Failed to load timetables',
-              ),
-              AsyncData<List<Timetable>>(value: final timetables) =>
-                DropdownButton<String>(
-                  isExpanded: true,
-                  hint: Text('Izberi urnik'),
-                  value: timetableId,
-                  items: [
-                    for (final timetable in timetables)
-                      DropdownMenuItem(
-                        value: timetable.id,
-                        child: Text(
-                          timetable.name,
-                          overflow: TextOverflow.ellipsis,
+      body: Column(
+        children: [
+          Expanded(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                children: [
+                  switch (timetables) {
+                    AsyncLoading<List<Timetable>>() => LinearProgressIndicator(),
+                    AsyncError<List<Timetable>>() => Text('Failed to load timetables'),
+                    AsyncData<List<Timetable>>(value: final timetables) =>
+                        DropdownButton<String>(
+                          isExpanded: true,
+                          hint: Text('Izberi urnik'),
+                          value: timetableId,
+                          items: [
+                            for (final timetable in timetables)
+                              DropdownMenuItem(
+                                value: timetable.id,
+                                child: Text(
+                                  timetable.name,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                          ],
+                          onChanged: (value) => setState(() => timetableId = value),
                         ),
-                      ),
-                  ],
-                  onChanged: (value) => setState(() => timetableId = value),
-                ),
-            },
-
-            SizedBox(height: 8.0),
-
-            TextField(
-              controller: studentIdController,
-              decoration: InputDecoration(label: Text('Vpisna številka')),
-              onChanged: (value) {
-                if (studentIdDebounce?.isActive ?? false) {
-                  studentIdDebounce?.cancel();
-                }
-                studentIdDebounce = Timer(
-                  const Duration(milliseconds: 500),
-                  () => setState(() => studentId = value),
-                );
-              },
+                  },
+                  SizedBox(height: 8.0),
+                  TextField(
+                    controller: studentIdController,
+                    decoration: InputDecoration(label: Text('Vpisna številka')),
+                    onChanged: (value) {
+                      if (studentIdDebounce?.isActive ?? false) {
+                        studentIdDebounce?.cancel();
+                      }
+                      studentIdDebounce = Timer(
+                        const Duration(milliseconds: 500),
+                            () => setState(() => studentId = value),
+                      );
+                    },
+                  ),
+                  TextField(
+                    decoration: InputDecoration(label: Text('Poimenuj urnik')),
+                    onChanged: (value) {
+                      preferedName = value;
+                    },
+                  ),
+                  SizedBox(height: 16.0),
+                  lecturesPreview(),
+                ],
+              ),
             ),
-
-            TextField(
-              decoration: InputDecoration(label: Text('Poimenuj urnik')),
-              onChanged: (value) {
-                preferedName = value;
-              },
-            ),
-
-            SizedBox(height: 16.0),
-
-            lecturesPreview(),
-
-            Spacer(),
-
-            SafeArea(
+          ),
+          SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
               child: Row(
                 children: [
                   Expanded(
@@ -239,9 +238,8 @@ class _ImportScreenState extends ConsumerState<ImportScreen> {
                 ],
               ),
             ),
-            SizedBox(height: 8.0),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
