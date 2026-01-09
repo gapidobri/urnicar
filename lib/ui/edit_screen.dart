@@ -147,6 +147,7 @@ class EditScreenState extends ConsumerState<EditScreen> {
               barrierColor: Colors.transparent,
               builder: (context) => EditLectureBottomSheet(
                 lecture: event.data!,
+                timetableId: timetable.sourceTimetableId,
                 onUpdate: (lecture) {
                   timetable = timetable.copyWith(
                     lectures: timetable.lectures
@@ -155,6 +156,14 @@ class EditScreenState extends ConsumerState<EditScreen> {
                   );
                   loadLectures();
                 },
+                onReplace: (oldLec, newLec) {
+                timetable = timetable.copyWith(
+                  lectures: timetable.lectures
+                      .map((l) => l.id == oldLec.id ? newLec : l)
+                      .toList(),
+                );
+                loadLectures();
+              },
               ),
             );
           },

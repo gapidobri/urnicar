@@ -11,11 +11,13 @@ class RemoteTimetableScreenParams {
   final FilterType filterType;
   final String filterId;
   final String title;
+  final bool selectionMode;
 
   const RemoteTimetableScreenParams({
     required this.filterType,
     required this.filterId,
     required this.title,
+    this.selectionMode = false,
   });
 }
 
@@ -24,6 +26,7 @@ class RemoteTimetableScreen extends ConsumerStatefulWidget {
   final FilterType filterType;
   final String filterId;
   final String title;
+  final bool selectionMode;
 
   const RemoteTimetableScreen({
     super.key,
@@ -31,6 +34,7 @@ class RemoteTimetableScreen extends ConsumerStatefulWidget {
     required this.filterType,
     required this.filterId,
     required this.title,
+    this.selectionMode = false,
   });
 
   @override
@@ -80,9 +84,14 @@ class _TemporaryCalendarScreenState
             return const Center(child: CircularProgressIndicator());
           }
 
-          final lectures = snapshot.data!;
-          final startOfWeek = DateTime.now().startOfWeek();
+          final lectures = widget.selectionMode
+              ? snapshot.data!.where((lecture) =>
+          lecture.type == LectureType.labExercises ||
+              lecture.type == LectureType.auditoryExercises
+          ).toList()
+              : snapshot.data!;
 
+          final startOfWeek = DateTime.now().startOfWeek();
           final events = lectures.map((lecture) {
             final day = startOfWeek.addDays(lecture.day.value);
 
@@ -110,10 +119,14 @@ class _TemporaryCalendarScreenState
                 final lecture = event.data;
                 if (lecture == null) return;
 
+                if (widget.selectionMode) {
+                  Navigator.pop(context, lecture);
+                } else {
                 showDialog(
                   context: context,
                   builder: (_) => LectureInfoDialog(lecture: lecture),
                 );
+                }
               },
             ),
             header: const CalendarHeader<Lecture>(

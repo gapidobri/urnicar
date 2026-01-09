@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:urnicar/data/remote_timetable/timetable_scraper.dart';
 
+import '../remote_timetable_screen.dart';
+
 final _lectureTypes = {
   LectureType.lecture: 'Predavanje',
   LectureType.labExercises: 'Laboratorijske vaje',
@@ -13,10 +15,16 @@ class EditLectureBottomSheet extends ConsumerStatefulWidget {
     super.key,
     required this.lecture,
     required this.onUpdate,
+    required this.onReplace,
+    required this.timetableId,
   });
 
   final Lecture lecture;
   final void Function(Lecture) onUpdate;
+
+  final String timetableId;
+
+  final void Function(Lecture, Lecture) onReplace;
 
   @override
   ConsumerState<ConsumerStatefulWidget> createState() =>
@@ -94,7 +102,25 @@ class _EditLectureBottomSheetState
               if (widget.lecture.type == LectureType.labExercises ||
                   widget.lecture.type == LectureType.auditoryExercises)
                 ElevatedButton(
-                  onPressed: () {},
+                  onPressed: () async {
+                    final chosen = await Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => RemoteTimetableScreen(
+                          timetableId: widget.timetableId,
+                          filterType: FilterType.subject,
+                          filterId: widget.lecture.subject.id,
+                          title: "Izberite nov termin",
+                          selectionMode: true,
+                        ),
+                      ),
+                    );
+
+                    if (chosen is Lecture) {
+                      widget.onReplace(widget.lecture, chosen);
+                      Navigator.pop(context);
+                    }
+                  },
                   style: ButtonStyle(
                     padding: WidgetStatePropertyAll(
                       EdgeInsets.symmetric(horizontal: 10.0),
