@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:kalender/kalender.dart';
+import 'package:urnicar/ui/widgets/calendar_components.dart';
 import 'package:urnicar/ui/widgets/lecture_info_dialog.dart';
 
 import '../data/remote_timetable/remote_lectures_provider.dart';
@@ -114,6 +115,7 @@ class _TemporaryCalendarScreenState
             eventsController: eventsController,
             calendarController: calendarController,
             viewConfiguration: viewConfiguration,
+            components: calendarComponents,
             callbacks: CalendarCallbacks(
               onEventTapped: (event, _) {
                 final lecture = event.data;
