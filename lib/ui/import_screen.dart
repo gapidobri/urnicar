@@ -10,6 +10,7 @@ import 'package:urnicar/data/remote_timetable/timetable_scraper.dart';
 import 'package:urnicar/data/sync/pocketbase.dart';
 import 'package:urnicar/data/timetable/timetable_record.dart';
 import 'package:urnicar/data/timetable/timetables_provider.dart';
+import 'package:urnicar/ui/subject_picker_screen.dart';
 import 'package:uuid/uuid.dart';
 
 class ImportScreen extends ConsumerStatefulWidget {
@@ -24,8 +25,10 @@ class _ImportScreenState extends ConsumerState<ImportScreen> {
   String? studentId;
 
   Timer? studentIdDebounce;
-
   final studentIdController = TextEditingController();
+
+  Set<Subject> selectedSubjects = {};
+  String? preferedName;
 
   @override
   void initState() {
@@ -61,23 +64,69 @@ class _ImportScreenState extends ConsumerState<ImportScreen> {
     }
 
     final remoteTimetables = await ref.read(remoteTimetablesProvider.future);
-
     final remoteTimetable = remoteTimetables.firstWhereOrNull(
       (t) => t.id == timetableId!,
     );
-
-    final lectures = await ref.read(
+    final studentLectures = await ref.read(
       remoteLecturesProvider
           .call(timetableId!, FilterType.student, studentId!)
           .future,
     );
 
+    final filteredLectures = studentLectures.where(
+          (lecture) => selectedSubjects.any((s) => s.id == lecture.subject.id),
+    ).toList();
+
+    // ce so novi
+    final existingSubjectIds =
+    filteredLectures.map((l) => l.subject.id).toSet();
+
+    final newlyAddedSubjects = selectedSubjects.where(
+          (s) => !existingSubjectIds.contains(s.id),
+    );
+
+    // za vsakega novega 1 lecture, 1 lab
+    for (final subject in newlyAddedSubjects) {
+      final allForSubject = await ref.read(
+        remoteLecturesProvider
+            .call(timetableId!, FilterType.subject, subject.id)
+            .future,
+      );
+
+      Lecture? predavanje;
+      Lecture? vaje;
+
+      for (final lec in allForSubject) {
+        if (predavanje == null &&
+            lec.type == LectureType.lecture) {
+          predavanje = lec;
+        }
+
+        if (vaje == null &&
+            (lec.type == LectureType.labExercises ||
+                lec.type == LectureType.auditoryExercises)) {
+          vaje = lec;
+        }
+
+        if (predavanje != null && vaje != null) break;
+      }
+
+      if (predavanje != null) filteredLectures.add(predavanje);
+      if (vaje != null) filteredLectures.add(vaje);
+    }
+
+    final uniqueLectures = {
+      for (final l in filteredLectures) l.id: l
+    }.values.toList();
+
+    final name = preferedName ?? remoteTimetable?.name ?? 'Nov urnik';
+
     final timetable = TimetableRecord(
       sourceTimetableId: timetableId!,
       studentId: studentId!,
       id: Uuid().v4(),
-      name: remoteTimetable?.name ?? 'Nov urnik',
-      lectures: lectures,
+      name: name,
+      lectures: uniqueLectures,
       updated: DateTime.now(),
     );
 
@@ -138,6 +187,13 @@ class _ImportScreenState extends ConsumerState<ImportScreen> {
               },
             ),
 
+            TextField(
+              decoration: InputDecoration(label: Text('Poimenuj urnik')),
+              onChanged: (value) {
+                preferedName = value;
+              },
+            ),
+
             SizedBox(height: 16.0),
 
             lecturesPreview(),
@@ -145,14 +201,44 @@ class _ImportScreenState extends ConsumerState<ImportScreen> {
             Spacer(),
 
             SafeArea(
-              child: ElevatedButton(
-                onPressed: timetableId != null && studentId != null
-                    ? handleImportTimetable
-                    : null,
-                child: Text('Uvozi urnik'),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: timetableId != null && studentId != null
+                          ? () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => SubjectPickerScreen(
+                              timetableId: timetableId ?? "",
+                              selectedSubjects: selectedSubjects,
+                            ),
+                          ),
+                        ).then((updatedSubjects) {
+                          if (updatedSubjects != null) {
+                            setState(() {
+                              selectedSubjects = updatedSubjects;
+                            });
+                          }
+                        });
+                      }
+                          : null,
+                      child: Text('Dodaj predmet'),
+                    ),
+                  ),
+                  SizedBox(width: 12),
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: timetableId != null && studentId != null
+                          ? handleImportTimetable
+                          : null,
+                      child: Text('Uvozi urnik'),
+                    ),
+                  ),
+                ],
               ),
             ),
-
             SizedBox(height: 8.0),
           ],
         ),
@@ -175,9 +261,12 @@ class _ImportScreenState extends ConsumerState<ImportScreen> {
       case AsyncError<List<Lecture>>():
         return Text('Napaka pri nalaganju urnika');
       case AsyncData<List<Lecture>>(value: final lectures):
-        final subjects = <Subject>{};
-        for (final lecture in lectures) {
-          subjects.add(lecture.subject);
+        if (selectedSubjects.isEmpty) {
+          final loaded = <Subject>{};
+          for (final lecture in lectures) {
+            loaded.add(lecture.subject);
+          }
+          selectedSubjects = loaded;
         }
 
         return Column(
@@ -192,16 +281,27 @@ class _ImportScreenState extends ConsumerState<ImportScreen> {
               ],
             ),
             SizedBox(height: 8.0),
-            if (subjects.isNotEmpty)
-              for (final subject in subjects)
-                Card(
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Text(subject.name),
+
+            selectedSubjects.isNotEmpty
+                ? Column(
+              children: [
+                for (final subject in selectedSubjects)
+                  ListTile(
+                    dense: true,
+                    visualDensity: VisualDensity.compact,
+                    title: Text(subject.name),
+                    trailing: IconButton(
+                      icon: const Icon(Icons.cancel_outlined),
+                      onPressed: () {
+                        setState(() {
+                          selectedSubjects.remove(subject);
+                        });
+                      },
+                    ),
                   ),
-                )
-            else
-              Text('Ni najdenih predmetov'),
+              ],
+            )
+                : Text('Ni najdenih predmetov'),
           ],
         );
     }
