@@ -12,6 +12,18 @@ import 'package:urnicar/ui/widgets/calendar_components.dart';
 import 'package:urnicar/ui/widgets/edit_lecture_bottom_sheet.dart';
 import 'package:urnicar/ui/widgets/lecture_tile.dart';
 
+enum Algorithm {
+  minimalOverlap,
+  minimalOverlapAndGap
+}
+
+class OptimisationOptions {
+  Algorithm algorithm;
+  DayOfWeek? freeDay;
+
+  OptimisationOptions({required this.algorithm, this.freeDay});
+}
+
 class EditScreen extends ConsumerStatefulWidget {
   const EditScreen({super.key, required this.timetableId});
 
@@ -30,6 +42,7 @@ class EditScreenState extends ConsumerState<EditScreen> {
 
   late final TextEditingController nameController;
 
+  OptimisationOptions options = OptimisationOptions(algorithm: Algorithm.minimalOverlap);
   @override
   void initState() {
     super.initState();
@@ -196,7 +209,73 @@ class EditScreenState extends ConsumerState<EditScreen> {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: optimise,
+        onPressed: () {
+          showModalBottomSheet(
+            context: context,
+            builder: (context) {
+              return Padding(
+                padding: const EdgeInsets.all(16),
+                child: StatefulBuilder(
+                  builder: (context, setModalState) {
+                    return Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        RadioGroup<Algorithm>(
+                          groupValue: options.algorithm,
+                          onChanged: (value) {
+                            if (value != null) setModalState(() => options.algorithm = value);
+                          },
+                          child: Column(
+                            children: [
+                              ListTile(
+                                title: const Text('Minimalno prekrivanje'),
+                                trailing: Radio<Algorithm>(value: Algorithm.minimalOverlap),
+                              ),
+                              ListTile(
+                                title: const Text('Minimalno prekrivanje in razmiki'),
+                                trailing: Radio<Algorithm>(value: Algorithm.minimalOverlapAndGap),
+                              ),
+                            ],
+                          ),
+                        ),
+                        ListTile(
+                          title: const Text('Prost dan'),
+                          trailing: DropdownButton<DayOfWeek>(
+                            value: options.freeDay,
+                            hint: const Text('-'),
+                            items: [
+                              DropdownMenuItem(value: null, child: Text('-')),
+                              DropdownMenuItem(value: DayOfWeek.monday, child: Text('Pon')),
+                              DropdownMenuItem(value: DayOfWeek.tuesday, child: Text('Tor')),
+                              DropdownMenuItem(value: DayOfWeek.wednesday, child: Text('Sre')),
+                              DropdownMenuItem(value: DayOfWeek.thursday, child: Text('Čet')),
+                              DropdownMenuItem(value: DayOfWeek.friday, child: Text('Pet')),
+                            ],
+                            onChanged: (value) {
+                              setModalState(() => options.freeDay = value);
+                            },
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.only(top: 16),
+                          child: Center(
+                            child: ElevatedButton(
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                                optimise();
+                              },
+                              child: const Text('Optimiziraj urnik'),
+                            ),
+                          ),
+                        ),
+                      ],
+                    );
+                  },
+                ),
+              );
+            },
+          );
+        },
         child: const Icon(Icons.auto_fix_high),
       ),
     );
