@@ -3,6 +3,11 @@ import 'dart:math';
 
 import 'package:urnicar/data/remote_timetable/timetable_scraper.dart';
 
+enum Algorithm {
+  minimalOverlap,
+  minimalOverlapAndGap
+}
+
 class TimetableOptimiser {
   static List<List<Lecture>> minimiseOverlap(List<Lecture> rawTimetable) {
     final (subjectsMap, timetable) = _prepareData(rawTimetable);
@@ -74,7 +79,7 @@ class TimetableOptimiser {
     return bestTimetables;
   }
 
-  static List<List<Lecture>> minimiseAndFree(List<Lecture> rawTimetable, DayOfWeek freeDay) {
+  static List<List<Lecture>> minimiseAndFree(List<Lecture> rawTimetable, Algorithm algorithm, DayOfWeek freeDay) {
     final List<Lecture> freeDayLectures = [];
     final List<Lecture> otherLectures = [];
 
@@ -89,7 +94,14 @@ class TimetableOptimiser {
       otherLectures.add(lecture);
     }
 
-    final optimised = minimiseOverlap(otherLectures);
+    final List<List<Lecture>> optimised;
+
+    if (algorithm == Algorithm.minimalOverlap) {
+      optimised = minimiseOverlap(otherLectures);
+    }
+    else { //if (algorithm == Algorithm.minimalOverlapAndGap) {
+      optimised = minimiseOverlapAndGap(otherLectures);
+    }
 
     for (final timetable in optimised) {
       // TODO: maybe change the .subject comparison to .subject.id comparison
@@ -178,13 +190,12 @@ class TimetableOptimiser {
 
   static int _getGap(List<List<Lecture>> timetable) {
     int gap = 0;
-    bool addAB = true;
-
     for (final dayTimetable in timetable) {
       final intervals = HashSet<(int, int)>();
       for (final lecture in dayTimetable) {
         int a = lecture.time.start;
         int b = lecture.time.end;
+        bool addAB = true;
         for (final (c, d) in HashSet<(int, int)>.from(intervals)) {
           if (d < a || b < c) {
             continue;

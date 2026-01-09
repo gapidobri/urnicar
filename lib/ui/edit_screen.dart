@@ -12,10 +12,6 @@ import 'package:urnicar/ui/widgets/calendar_components.dart';
 import 'package:urnicar/ui/widgets/edit_lecture_bottom_sheet.dart';
 import 'package:urnicar/ui/widgets/lecture_tile.dart';
 
-enum Algorithm {
-  minimalOverlap,
-  minimalOverlapAndGap
-}
 
 class OptimisationOptions {
   Algorithm algorithm;
@@ -122,7 +118,17 @@ class EditScreenState extends ConsumerState<EditScreen> {
         )
         .toList();
 
-    final result = TimetableOptimiser.minimiseOverlapAndGap(filteredLectures);
+
+    final List<List<Lecture>> result;
+    if (options.freeDay != null) {
+      result = TimetableOptimiser.minimiseAndFree(filteredLectures, options.algorithm, options.freeDay!);
+    }
+    else if (options.algorithm == Algorithm.minimalOverlap) {
+      result = TimetableOptimiser.minimiseOverlap(filteredLectures);
+    }
+    else { //if (options.algorithm == Algorithm.minimalOverlapAndGap) {
+      result = TimetableOptimiser.minimiseOverlapAndGap(filteredLectures);
+    }
 
     final selectedResult = result[0];
 
