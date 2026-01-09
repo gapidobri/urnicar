@@ -5,21 +5,7 @@ import 'package:urnicar/data/remote_timetable/timetable_scraper.dart';
 
 class TimetableOptimiser {
   static List<List<Lecture>> minimiseOverlap(List<Lecture> rawTimetable) {
-    final subjectsMap = <String, List<Lecture>>{};
-    final timetable = List<List<Lecture>>.generate(5, (_) => []);
-
-    for (final lecture in rawTimetable) {
-      if (lecture.type == LectureType.lecture) {
-        timetable[lecture.day.value].add(lecture);
-        continue;
-      }
-
-      if (subjectsMap[lecture.subject.id] == null) {
-        subjectsMap[lecture.subject.id] = [];
-      }
-
-      subjectsMap[lecture.subject.id]?.add(lecture);
-    }
+    final (subjectsMap, timetable) = _prepareData(rawTimetable);
 
     int bestOverlap = 99999;
     List<List<Lecture>> bestTimetables = [];
@@ -50,21 +36,7 @@ class TimetableOptimiser {
   }
 
   static List<List<Lecture>> minimiseOverlapAndGap(List<Lecture> rawTimetable) {
-    final subjectsMap = <String, List<Lecture>>{};
-    final timetable = List<List<Lecture>>.generate(5, (_) => []);
-
-    for (final lecture in rawTimetable) {
-      if (lecture.type == LectureType.lecture) {
-        timetable[lecture.day.value].add(lecture);
-        continue;
-      }
-
-      if (subjectsMap[lecture.subject.id] == null) {
-        subjectsMap[lecture.subject.id] = [];
-      }
-
-      subjectsMap[lecture.subject.id]?.add(lecture);
-    }
+    final (subjectsMap, timetable) = _prepareData(rawTimetable);
 
     int bestOverlap = 99999;
     int bestGap = 99999;
@@ -100,6 +72,69 @@ class TimetableOptimiser {
     }
 
     return bestTimetables;
+  }
+
+  static List<List<Lecture>> minimiseAndFree(List<Lecture> rawTimetable, DayOfWeek freeDay) {
+    final List<Lecture> freeDayLectures = [];
+    final List<Lecture> otherLectures = [];
+
+    for (Lecture lecture in rawTimetable) {
+      if (lecture.day == freeDay) {
+        // Lecture l = lecture.copyWith(hidden: true);
+        // freeDayLectures.add(l);
+        freeDayLectures.add(lecture);
+        continue;
+      }
+
+      otherLectures.add(lecture);
+    }
+
+    final optimised = minimiseOverlap(otherLectures);
+    final List<Lecture> appendToDay = freeDayLectures;
+
+    for (final timetable in optimised) {
+      // TODO: maybe change the .subject comparison to .subject.id comparison
+      final result = freeDayLectures.where((b) => !timetable.any((a) => a.subject == b.subject && a.type == b.type)).toList();
+      timetable.addAll(result);
+    }
+
+    return optimised;
+  }
+
+  static (Map<String, List<Lecture>>, List<List<Lecture>>) _prepareData(List<Lecture> rawTimetable) {
+    final subjectsMap = <String, List<Lecture>>{};
+    final timetable = List<List<Lecture>>.generate(5, (_) => []);
+
+    // for (final l in rawTimetable) {
+    //   print(l.pinned.toString() + ", " + l.hidden.toString() + ", " + l.subject.toString() + ", " + l.day.toString() + ", " + l.time.toString());
+    // }
+
+    final pinnedLabwork = HashSet<String>();
+    for (final lecture in rawTimetable) {
+      if (lecture.type == LectureType.lecture) {
+        timetable[lecture.day.value].add(lecture);
+        continue;
+      }
+
+      // Handles the pinned lectures - adds them to the timetable unconditionally and marks them to be removed from subjects map
+      if (lecture.pinned == true) {
+        timetable[lecture.day.value].add(lecture);
+        pinnedLabwork.add(lecture.id);
+        continue;
+      }
+
+      if (subjectsMap[lecture.subject.id] == null) {
+        subjectsMap[lecture.subject.id] = [];
+      }
+
+      subjectsMap[lecture.subject.id]?.add(lecture);
+    }
+
+    // Removes subjects, where at least one non-lecture is pinned
+    // so the optimiser doesn't try to fit other non-lectures of the same subject
+    subjectsMap.removeWhere((key, value) => pinnedLabwork.contains(key));
+
+    return (subjectsMap, timetable);
   }
 
   static List<List<Lecture>> _allCombinations(List<List<Lecture>> lists) {
