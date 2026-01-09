@@ -41,7 +41,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
     final displayRange = DateTime.now().weekRange();
     final timeOfDayRange = TimeOfDayRange(
       start: TimeOfDay(hour: 6, minute: 0),
-      end: TimeOfDay(hour: 21, minute: 0),
+      end: TimeOfDay(hour: 20, minute: 59),
     );
     viewConfigurations = [
       MultiDayViewConfiguration.singleDay(

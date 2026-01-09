@@ -41,7 +41,7 @@ class EditScreenState extends ConsumerState<EditScreen> {
     final displayRange = DateTime.now().weekRange();
     final timeOfDayRange = TimeOfDayRange(
       start: const TimeOfDay(hour: 6, minute: 0),
-      end: const TimeOfDay(hour: 21, minute: 0),
+      end: const TimeOfDay(hour: 20, minute: 59),
     );
 
     viewConfiguration = MultiDayViewConfiguration.workWeek(
