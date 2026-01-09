@@ -93,6 +93,16 @@ class EditScreenState extends ConsumerState<EditScreen> {
       ),
     ).then((t) => t.forEach(lectures.addAll));
 
+    for (int i = 0; i < timetable.lectures.length; i++) {
+      for (int j = 0; j < lectures.length; j++) {
+        final testLecture = timetable.lectures[i].copyWith(pinned: false);
+        if (testLecture == lectures[j]) {
+          lectures[j] = lectures[j].copyWith(pinned: timetable.lectures[i].pinned);
+          break;
+        }
+      }
+    }
+
     final filteredLectures = lectures
         .whereNot(
           (l) => hiddenSubjectMap[l.subject.id]?.contains(l.type) ?? false,

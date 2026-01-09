@@ -90,7 +90,6 @@ class TimetableOptimiser {
     }
 
     final optimised = minimiseOverlap(otherLectures);
-    final List<Lecture> appendToDay = freeDayLectures;
 
     for (final timetable in optimised) {
       // TODO: maybe change the .subject comparison to .subject.id comparison
@@ -119,7 +118,7 @@ class TimetableOptimiser {
       // Handles the pinned lectures - adds them to the timetable unconditionally and marks them to be removed from subjects map
       if (lecture.pinned == true) {
         timetable[lecture.day.value].add(lecture);
-        pinnedLabwork.add(lecture.id);
+        pinnedLabwork.add(lecture.subject.id);
         continue;
       }
 
