@@ -73,16 +73,19 @@ class _ImportScreenState extends ConsumerState<ImportScreen> {
           .future,
     );
 
-    final filteredLectures = studentLectures.where(
+    final filteredLectures = studentLectures
+        .where(
           (lecture) => selectedSubjects.any((s) => s.id == lecture.subject.id),
-    ).toList();
+        )
+        .toList();
 
     // ce so novi
-    final existingSubjectIds =
-    filteredLectures.map((l) => l.subject.id).toSet();
+    final existingSubjectIds = filteredLectures
+        .map((l) => l.subject.id)
+        .toSet();
 
     final newlyAddedSubjects = selectedSubjects.where(
-          (s) => !existingSubjectIds.contains(s.id),
+      (s) => !existingSubjectIds.contains(s.id),
     );
 
     // za vsakega novega 1 lecture, 1 lab
@@ -97,8 +100,7 @@ class _ImportScreenState extends ConsumerState<ImportScreen> {
       Lecture? vaje;
 
       for (final lec in allForSubject) {
-        if (predavanje == null &&
-            lec.type == LectureType.lecture) {
+        if (predavanje == null && lec.type == LectureType.lecture) {
           predavanje = lec;
         }
 
@@ -116,7 +118,7 @@ class _ImportScreenState extends ConsumerState<ImportScreen> {
     }
 
     final uniqueLectures = {
-      for (final l in filteredLectures) l.id: l
+      for (final l in filteredLectures) l.id: l,
     }.values.toList();
 
     final name = preferedName ?? remoteTimetable?.name ?? 'Nov urnik';
@@ -151,25 +153,29 @@ class _ImportScreenState extends ConsumerState<ImportScreen> {
               child: Column(
                 children: [
                   switch (timetables) {
-                    AsyncLoading<List<Timetable>>() => LinearProgressIndicator(),
-                    AsyncError<List<Timetable>>() => Text('Failed to load timetables'),
+                    AsyncLoading<List<Timetable>>() =>
+                      LinearProgressIndicator(),
+                    AsyncError<List<Timetable>>() => Text(
+                      'Failed to load timetables',
+                    ),
                     AsyncData<List<Timetable>>(value: final timetables) =>
-                        DropdownButton<String>(
-                          isExpanded: true,
-                          hint: Text('Izberi urnik'),
-                          value: timetableId,
-                          items: [
-                            for (final timetable in timetables)
-                              DropdownMenuItem(
-                                value: timetable.id,
-                                child: Text(
-                                  timetable.name,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
+                      DropdownButton<String>(
+                        isExpanded: true,
+                        hint: Text('Izberi urnik'),
+                        value: timetableId,
+                        items: [
+                          for (final timetable in timetables)
+                            DropdownMenuItem(
+                              value: timetable.id,
+                              child: Text(
+                                timetable.name,
+                                overflow: TextOverflow.ellipsis,
                               ),
-                          ],
-                          onChanged: (value) => setState(() => timetableId = value),
-                        ),
+                            ),
+                        ],
+                        onChanged: (value) =>
+                            setState(() => timetableId = value),
+                      ),
                   },
                   SizedBox(height: 8.0),
                   TextField(
@@ -181,7 +187,7 @@ class _ImportScreenState extends ConsumerState<ImportScreen> {
                       }
                       studentIdDebounce = Timer(
                         const Duration(milliseconds: 500),
-                            () => setState(() => studentId = value),
+                        () => setState(() => studentId = value),
                       );
                     },
                   ),
@@ -206,22 +212,22 @@ class _ImportScreenState extends ConsumerState<ImportScreen> {
                     child: ElevatedButton(
                       onPressed: timetableId != null && studentId != null
                           ? () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => SubjectPickerScreen(
-                              timetableId: timetableId ?? "",
-                              selectedSubjects: selectedSubjects,
-                            ),
-                          ),
-                        ).then((updatedSubjects) {
-                          if (updatedSubjects != null) {
-                            setState(() {
-                              selectedSubjects = updatedSubjects;
-                            });
-                          }
-                        });
-                      }
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => SubjectPickerScreen(
+                                    timetableId: timetableId ?? "",
+                                    selectedSubjects: selectedSubjects,
+                                  ),
+                                ),
+                              ).then((updatedSubjects) {
+                                if (updatedSubjects != null) {
+                                  setState(() {
+                                    selectedSubjects = updatedSubjects;
+                                  });
+                                }
+                              });
+                            }
                           : null,
                       child: Text('Dodaj predmet'),
                     ),
@@ -282,23 +288,23 @@ class _ImportScreenState extends ConsumerState<ImportScreen> {
 
             selectedSubjects.isNotEmpty
                 ? Column(
-              children: [
-                for (final subject in selectedSubjects)
-                  ListTile(
-                    dense: true,
-                    visualDensity: VisualDensity.compact,
-                    title: Text(subject.name),
-                    trailing: IconButton(
-                      icon: const Icon(Icons.cancel_outlined),
-                      onPressed: () {
-                        setState(() {
-                          selectedSubjects.remove(subject);
-                        });
-                      },
-                    ),
-                  ),
-              ],
-            )
+                    children: [
+                      for (final subject in selectedSubjects)
+                        ListTile(
+                          dense: true,
+                          visualDensity: VisualDensity.compact,
+                          title: Text(subject.name),
+                          trailing: IconButton(
+                            icon: const Icon(Icons.cancel_outlined),
+                            onPressed: () {
+                              setState(() {
+                                selectedSubjects.remove(subject);
+                              });
+                            },
+                          ),
+                        ),
+                    ],
+                  )
                 : Text('Ni najdenih predmetov'),
           ],
         );
